@@ -18,8 +18,14 @@
   .logo-text{font-family:'Bebas Neue';font-size:24px;letter-spacing:2px}
   .badge{background:var(--red);color:#fff;padding:6px 16px;border-radius:20px;font-weight:700;font-size:14px;letter-spacing:1px}
 
+  /* LOADING */
+  #s-loading{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:70vh;gap:20px;text-align:center}
+  .loading-icon{font-size:48px;animation:spin 1.5s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .loading-txt{color:var(--muted);font-size:15px}
+
   /* LOBBY */
-  #s-lobby{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:70vh;gap:32px}
+  #s-lobby{display:none;flex-direction:column;align-items:center;justify-content:center;min-height:70vh;gap:32px}
   .pin-box{text-align:center;background:var(--surface);border:2px solid var(--border);border-radius:20px;padding:40px 60px}
   .pin-lbl{font-size:13px;color:var(--muted);letter-spacing:3px;text-transform:uppercase;margin-bottom:8px}
   .pin-num{font-family:'Bebas Neue';font-size:96px;color:var(--gold);line-height:1;letter-spacing:8px}
@@ -105,6 +111,12 @@
 </div>
 <div class="wrap">
 
+  <!-- LOADING — shown until Supabase confirms PIN saved -->
+  <div id="s-loading">
+    <div class="loading-icon">⚙️</div>
+    <div class="loading-txt">Đang khởi tạo phòng thi...</div>
+  </div>
+
   <div id="s-lobby">
     <div class="pin-box">
       <div class="pin-lbl">Mã phòng thi</div>
@@ -180,83 +192,89 @@ const CD_SECS = 3;
 const {createClient} = supabase;
 const db = createClient(SB_URL, SB_KEY);
 
-let qBank = {cb:[], nc:[]};
-let sessQs = [], curIdx = 0, curSess = 1;
-let timerInt = null, pollInt = null, ansInt = null, cdInt = null;
-let tLeft = 15, players = [], pin = '';
+let qBank={cb:[],nc:[]}, sessQs=[], curIdx=0, curSess=1;
+let timerInt=null, pollInt=null, ansInt=null, cdInt=null;
+let tLeft=15, players=[], pin='';
 
-// ── TSV PARSER — tab separated, handles multiline cells cleanly ──────────────
 function parseTSV(text) {
-  // Normalize line endings
-  const normalized = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
-  const lines = normalized.split('\n').filter(l => l.trim());
-  const headers = lines[0].split('\t').map(h => h.trim());
+  const lines = text.replace(/\r\n/g,'\n').replace(/\r/g,'\n').split('\n').filter(l=>l.trim());
+  const headers = lines[0].split('\t').map(h=>h.trim());
   return lines.slice(1).map(line => {
     const vals = line.split('\t');
     const obj = {};
-    headers.forEach((h, i) => {
-      obj[h] = (vals[i] || '').trim();
-    });
+    headers.forEach((h,i) => obj[h] = (vals[i]||'').trim());
     return obj;
   }).filter(q => q.id && q.question);
 }
 
-// ── Clean & normalize answer value ──────────────────────────────────────────
-function cleanAnswer(v) {
-  return (v || '').trim().toUpperCase().replace(/[^A-D]/g, '');
-}
+function cleanAns(v) { return (v||'').trim().toUpperCase().replace(/[^A-D]/g,''); }
 
 function shuffle(arr) {
-  const a = [...arr];
-  for (let i = a.length-1; i > 0; i--) {
-    const j = Math.floor(Math.random()*(i+1));
-    [a[i],a[j]] = [a[j],a[i]];
-  }
+  const a=[...arr];
+  for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}
   return a;
 }
 
-function genPin() { return Math.floor(1000 + Math.random()*9000).toString(); }
+function genPin() { return Math.floor(1000+Math.random()*9000).toString(); }
 
 async function loadQs() {
-  showToast('⏳ Đang tải câu hỏi...');
   try {
-    const [r1, r2] = await Promise.all([
-      fetch(TSV_CB).then(r => r.text()),
-      fetch(TSV_NC).then(r => r.text())
+    const [r1,r2] = await Promise.all([
+      fetch(TSV_CB).then(r=>r.text()),
+      fetch(TSV_NC).then(r=>r.text())
     ]);
     qBank.cb = parseTSV(r1);
     qBank.nc = parseTSV(r2);
-    // Normalize answer field for all questions
-    qBank.cb.forEach(q => q.answer = cleanAnswer(q.answer));
-    qBank.nc.forEach(q => q.answer = cleanAnswer(q.answer));
-    showToast(`✅ ${qBank.cb.length} câu cơ bản · ${qBank.nc.length} câu nâng cao`);
-  } catch(e) { showToast('❌ Lỗi tải câu hỏi: ' + e.message); }
+    qBank.cb.forEach(q => q.answer = cleanAns(q.answer));
+    qBank.nc.forEach(q => q.answer = cleanAns(q.answer));
+    return true;
+  } catch(e) {
+    showToast('❌ Lỗi tải câu hỏi: '+e.message);
+    return false;
+  }
 }
 
 function buildSessQs() {
-  const cb = shuffle(qBank.cb).slice(0,8).map(q => ({...q, _type:'basic'}));
-  const nc = shuffle(qBank.nc).slice(0,2).map(q => ({...q, _type:'advanced'}));
-  return shuffle([...cb, ...nc]);
+  const cb = shuffle(qBank.cb).slice(0,8).map(q=>({...q,_type:'basic'}));
+  const nc = shuffle(qBank.nc).slice(0,2).map(q=>({...q,_type:'advanced'}));
+  return shuffle([...cb,...nc]);
 }
 
 async function init() {
+  showScreen('s-loading');
   pin = genPin();
-  document.getElementById('pin-num').textContent = pin;
-  const base = window.location.href.replace('host.html','player.html');
-  document.getElementById('pin-url').textContent = base + '?pin=' + pin;
 
-  await loadQs();
+  // ── Load questions first ──
+  const ok = await loadQs();
+  if (!ok) return;
 
-  // Reset all game data
-  await db.from('players').delete().neq('id','__none__');
-  await db.from('answers').delete().neq('id', 0);
-  await db.from('game_state').upsert({
+  // ── Reset all data ──
+  await Promise.all([
+    db.from('players').delete().neq('id','__none__'),
+    db.from('answers').delete().neq('id',0)
+  ]);
+
+  // ── Save new PIN to Supabase — WAIT for confirm before showing PIN ──
+  const {error} = await db.from('game_state').upsert({
     id:'current', status:'lobby', session:1,
     question_index:0, pin:pin,
     session_questions:null,
     countdown_started_at:null,
     question_started_at:null
   });
+
+  if (error) {
+    showToast('❌ Lỗi khởi tạo: ' + error.message);
+    return;
+  }
+
+  // ── Only NOW show PIN — Supabase confirmed ──
+  document.getElementById('pin-num').textContent = pin;
+  const base = window.location.href.replace('host.html','player.html');
+  document.getElementById('pin-url').textContent = base + '?pin=' + pin;
+  showToast(`✅ Tải xong · ${qBank.cb.length} câu cơ bản · ${qBank.nc.length} câu nâng cao`);
+
+  showScreen('s-lobby');
   startLobbyPoll();
 }
 
@@ -264,19 +282,19 @@ function startLobbyPoll() {
   clearInterval(pollInt);
   pollInt = setInterval(async () => {
     const {data} = await db.from('players').select('*').order('joined_at');
-    if (data) { players = data; renderPlayers(data); }
+    if (data) { players=data; renderPlayers(data); }
   }, 2000);
 }
 
 function renderPlayers(list) {
   document.getElementById('pgrid').innerHTML =
-    list.map(p => `<div class="chip">👤 ${p.name}</div>`).join('');
+    list.map(p=>`<div class="chip">👤 ${p.name}</div>`).join('');
   document.getElementById('pcnt').textContent = `${list.length} người chơi`;
   document.getElementById('btn-start').disabled = list.length === 0;
 }
 
 async function startSession(sess) {
-  curSess = sess; curIdx = 0;
+  curSess=sess; curIdx=0;
   sessQs = buildSessQs();
   clearInterval(pollInt);
   document.getElementById('badge').textContent = `SESSION ${sess}`;
@@ -287,21 +305,19 @@ async function pushCountdown(idx) {
   const now = new Date().toISOString();
   await db.from('game_state').upsert({
     id:'current', status:'countdown',
-    session: curSess, question_index: idx,
-    session_questions: sessQs,
-    countdown_started_at: now,
-    question_started_at: null
+    session:curSess, question_index:idx,
+    session_questions:sessQs,
+    countdown_started_at:now,
+    question_started_at:null
   });
   showCountdown(idx);
 }
 
 function showCountdown(idx) {
   const q = sessQs[idx];
-  const adv = q._type === 'advanced';
-  document.getElementById('cd-info').textContent =
-    `Câu ${idx+1}/10 · ${adv ? '⭐ Nâng cao' : 'Cơ bản'}`;
+  const adv = q._type==='advanced';
+  document.getElementById('cd-info').textContent = `Câu ${idx+1}/10 · ${adv?'⭐ Nâng cao':'Cơ bản'}`;
   showScreen('s-cd');
-
   let c = CD_SECS;
   document.getElementById('cd-num').textContent = c;
   clearInterval(cdInt);
@@ -311,161 +327,149 @@ function showCountdown(idx) {
     if (c <= 0) {
       clearInterval(cdInt);
       const qStart = new Date().toISOString();
-      await db.from('game_state').upsert({
-        id:'current', status:'question',
-        question_started_at: qStart
-      });
+      await db.from('game_state').upsert({id:'current',status:'question',question_started_at:qStart});
       showQ(idx);
     }
   }, 1000);
 }
 
 function showQ(idx) {
-  curIdx = idx;
-  const q = sessQs[idx];
-  const adv = q._type === 'advanced';
+  curIdx=idx;
+  const q=sessQs[idx], adv=q._type==='advanced';
   document.getElementById('qcnt').textContent = `CÂU ${idx+1} / 10`;
-  document.getElementById('qtag').textContent = adv ? '⭐ NÂNG CAO' : 'CƠ BẢN';
-  document.getElementById('qtag').className = `qtag ${adv ? 'adv' : 'basic'}`;
+  document.getElementById('qtag').textContent = adv?'⭐ NÂNG CAO':'CƠ BẢN';
+  document.getElementById('qtag').className   = `qtag ${adv?'adv':'basic'}`;
   document.getElementById('qtxt').textContent = q.question;
-  document.getElementById('a-A').textContent = q.A;
-  document.getElementById('a-B').textContent = q.B;
-  document.getElementById('a-C').textContent = q.C;
-  document.getElementById('a-D').textContent = q.D;
+  document.getElementById('a-A').textContent  = q.A;
+  document.getElementById('a-B').textContent  = q.B;
+  document.getElementById('a-C').textContent  = q.C;
+  document.getElementById('a-D').textContent  = q.D;
   document.getElementById('s-total').textContent = players.length;
-  document.getElementById('s-ans').textContent = '0';
-  document.getElementById('s-rem').textContent = players.length;
+  document.getElementById('s-ans').textContent   = '0';
+  document.getElementById('s-rem').textContent   = players.length;
   showScreen('s-q');
-  startTimer();
-  pollAns();
+  startTimer(); pollAns();
 }
 
 function pollAns() {
   clearInterval(ansInt);
   ansInt = setInterval(async () => {
     const {data} = await db.from('answers')
-      .select('*').eq('session', curSess).eq('question_index', curIdx);
+      .select('*').eq('session',curSess).eq('question_index',curIdx);
     if (!data) return;
     document.getElementById('s-ans').textContent = data.length;
-    document.getElementById('s-rem').textContent = Math.max(0, players.length - data.length);
-    if (data.length >= players.length && players.length > 0) {
-      clearInterval(ansInt); endQ();
-    }
+    document.getElementById('s-rem').textContent = Math.max(0,players.length-data.length);
+    if (data.length>=players.length && players.length>0) { clearInterval(ansInt); endQ(); }
   }, 1000);
 }
 
 function startTimer() {
-  tLeft = 15; clearInterval(timerInt);
-  const bar = document.getElementById('tbar');
-  const num = document.getElementById('tnum');
-  bar.style.width = '100%'; bar.className = 'tbar'; num.className = 'tnum';
-  timerInt = setInterval(() => {
+  tLeft=15; clearInterval(timerInt);
+  const bar=document.getElementById('tbar'), num=document.getElementById('tnum');
+  bar.style.width='100%'; bar.className='tbar'; num.className='tnum';
+  timerInt = setInterval(()=>{
     tLeft--;
-    bar.style.width = (tLeft/15*100) + '%';
-    num.textContent = tLeft;
-    if (tLeft <= 5) { bar.className = 'tbar warn'; num.className = 'tnum warn'; }
-    if (tLeft <= 0) { clearInterval(timerInt); clearInterval(ansInt); endQ(); }
-  }, 1000);
+    bar.style.width=(tLeft/15*100)+'%'; num.textContent=tLeft;
+    if(tLeft<=5){bar.className='tbar warn';num.className='tnum warn';}
+    if(tLeft<=0){clearInterval(timerInt);clearInterval(ansInt);endQ();}
+  },1000);
 }
 
 async function endQ() {
   clearInterval(timerInt); clearInterval(ansInt);
-  await db.from('game_state').upsert({id:'current', status:'result'});
+  await db.from('game_state').upsert({id:'current',status:'result'});
   const {data:ans} = await db.from('answers')
-    .select('*').eq('session', curSess).eq('question_index', curIdx);
-  const {data:lb} = await db.from('players').select('*').order('score', {ascending:false});
+    .select('*').eq('session',curSess).eq('question_index',curIdx);
+  const {data:lb} = await db.from('players').select('*').order('score',{ascending:false});
   showScreen('s-result');
-  renderDist(ans || []);
-  await renderLB(lb || [], 'lb-mid');
-  const lastQ = curIdx >= 9, lastS = curSess >= 2;
-  const btn = document.getElementById('btn-next');
-  if (lastQ && lastS)  btn.textContent = '🏆 Xem kết quả cuối cùng';
-  else if (lastQ)      btn.textContent = '🚀 Bắt đầu Session 2';
-  else                 btn.textContent = `Câu tiếp theo ▶ (${curIdx+2}/10)`;
+  renderDist(ans||[]);
+  await renderLB(lb||[],'lb-mid');
+  const lastQ=curIdx>=9, lastS=curSess>=2;
+  const btn=document.getElementById('btn-next');
+  if(lastQ&&lastS)   btn.textContent='🏆 Xem kết quả cuối cùng';
+  else if(lastQ)     btn.textContent='🚀 Bắt đầu Session 2';
+  else               btn.textContent=`Câu tiếp theo ▶ (${curIdx+2}/10)`;
 }
 
 function renderDist(ans) {
-  const c = {A:0,B:0,C:0,D:0};
-  ans.forEach(a => { if (a.answer in c) c[a.answer]++; });
-  const max = Math.max(...Object.values(c), 1);
-  ['A','B','C','D'].forEach(k => {
-    document.getElementById(`bar-${k}`).style.height = (c[k]/max*100) + '%';
-    document.getElementById(`cnt-${k}`).textContent = c[k];
+  const c={A:0,B:0,C:0,D:0};
+  ans.forEach(a=>{if(a.answer in c)c[a.answer]++;});
+  const max=Math.max(...Object.values(c),1);
+  ['A','B','C','D'].forEach(k=>{
+    document.getElementById(`bar-${k}`).style.height=(c[k]/max*100)+'%';
+    document.getElementById(`cnt-${k}`).textContent=c[k];
   });
 }
 
-async function renderLB(list, id) {
-  const ranks = ['🥇','🥈','🥉'], rc = ['gold','silver','bronze'];
-  const {data:allAns} = await db.from('answers').select('player_id,answered_at');
-  const tmap = {};
-  (allAns||[]).forEach(a => { tmap[a.player_id] = (tmap[a.player_id]||0) + (a.answered_at||0); });
-  document.getElementById(id).innerHTML = list.slice(0,20).map((p,i) => `
+async function renderLB(list,id) {
+  const ranks=['🥇','🥈','🥉'],rc=['gold','silver','bronze'];
+  const {data:allAns}=await db.from('answers').select('player_id,answered_at');
+  const tmap={};
+  (allAns||[]).forEach(a=>{tmap[a.player_id]=(tmap[a.player_id]||0)+(a.answered_at||0);});
+  document.getElementById(id).innerHTML=list.slice(0,20).map((p,i)=>`
     <div class="lbrow">
       <div class="lbrank ${rc[i]||''}">${ranks[i]||i+1}</div>
       <div class="lbname">${p.name}</div>
       <div class="lbscore">${p.score.toFixed(2)}</div>
-      <div class="lbtime">⏱ ${tmap[p.id] ? tmap[p.id].toFixed(1)+'s' : '—'}</div>
+      <div class="lbtime">⏱ ${tmap[p.id]?tmap[p.id].toFixed(1)+'s':'—'}</div>
     </div>`).join('');
 }
 
 async function nextQ() {
-  const lastQ = curIdx >= 9, lastS = curSess >= 2;
-  if (lastQ && lastS) { showFinal(); return; }
-  if (lastQ) {
+  const lastQ=curIdx>=9, lastS=curSess>=2;
+  if(lastQ&&lastS){showFinal();return;}
+  if(lastQ){
     showScreen('s-lobby');
-    document.getElementById('badge').textContent = 'NGHỈ GIẢI LAO';
-    const btn = document.getElementById('btn-start');
-    btn.textContent = '🚀 Bắt đầu Session 2';
-    btn.onclick = () => startSession(2);
-    btn.disabled = false;
-    renderPlayers(players);
-    return;
+    document.getElementById('badge').textContent='NGHỈ GIẢI LAO';
+    const btn=document.getElementById('btn-start');
+    btn.textContent='🚀 Bắt đầu Session 2';
+    btn.onclick=()=>startSession(2); btn.disabled=false;
+    renderPlayers(players); return;
   }
-  await pushCountdown(curIdx + 1);
+  await pushCountdown(curIdx+1);
 }
 
 async function showFinal() {
-  await db.from('game_state').upsert({id:'current', status:'final'});
-  const {data:lb} = await db.from('players').select('*').order('score', {ascending:false});
+  await db.from('game_state').upsert({id:'current',status:'final'});
+  const {data:lb}=await db.from('players').select('*').order('score',{ascending:false});
   showScreen('s-final');
-  await renderLB(lb || [], 'lb-final');
+  await renderLB(lb||[],'lb-final');
 }
 
 async function exportCSV() {
-  const {data:pList} = await db.from('players').select('*').order('score', {ascending:false});
-  const {data:ans} = await db.from('answers').select('*');
-  const tmap = {};
-  (ans||[]).forEach(a => { tmap[a.player_id] = (tmap[a.player_id]||0) + (a.answered_at||0); });
-  const rows = [['Thứ hạng','Họ và Tên','Tổng điểm','Tổng thời gian (giây)']];
-  (pList||[]).forEach((p,i) => {
-    rows.push([i+1, p.name, p.score.toFixed(2), (tmap[p.id]||0).toFixed(1)]);
-  });
-  const csv = rows.map(r => r.map(v => `"${v}"`).join(',')).join('\n');
-  const blob = new Blob(['\uFEFF'+csv], {type:'text/csv;charset=utf-8;'});
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = `SHB_Quiz_${new Date().toLocaleDateString('vi-VN').replace(/\//g,'-')}.csv`;
-  a.click();
-  showToast('✅ Xuất file thành công!');
+  const {data:pList}=await db.from('players').select('*').order('score',{ascending:false});
+  const {data:ans}=await db.from('answers').select('*');
+  const tmap={};
+  (ans||[]).forEach(a=>{tmap[a.player_id]=(tmap[a.player_id]||0)+(a.answered_at||0);});
+  const rows=[['Thứ hạng','Họ và Tên','Tổng điểm','Tổng thời gian (giây)']];
+  (pList||[]).forEach((p,i)=>{rows.push([i+1,p.name,p.score.toFixed(2),(tmap[p.id]||0).toFixed(1)]);});
+  const csv=rows.map(r=>r.map(v=>`"${v}"`).join(',')).join('\n');
+  const blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download=`SHB_Quiz_${new Date().toLocaleDateString('vi-VN').replace(/\//g,'-')}.csv`;
+  a.click(); showToast('✅ Xuất file thành công!');
 }
 
 async function resetGame() {
-  await db.from('players').delete().neq('id','__none__');
-  await db.from('answers').delete().neq('id', 0);
+  await Promise.all([
+    db.from('players').delete().neq('id','__none__'),
+    db.from('answers').delete().neq('id',0)
+  ]);
   window.location.reload();
 }
 
 function showScreen(id) {
-  ['s-lobby','s-cd','s-q','s-result','s-final'].forEach(s => {
-    document.getElementById(s).style.display = 'none';
+  ['s-loading','s-lobby','s-cd','s-q','s-result','s-final'].forEach(s=>{
+    document.getElementById(s).style.display='none';
   });
-  document.getElementById(id).style.display = (id === 's-lobby') ? 'flex' : 'block';
+  document.getElementById(id).style.display=(id==='s-lobby'||id==='s-loading')?'flex':'block';
 }
 
 function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg; t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 3000);
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),3000);
 }
 
 init();
