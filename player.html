@@ -15,15 +15,13 @@
 
   /* JOIN */
   #join-screen { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:24px; }
-  .logo-big { text-align:center; }
   .logo-icon { width:72px; height:72px; background:var(--red); border-radius:16px; display:flex; align-items:center; justify-content:center; font-family:'Bebas Neue'; font-size:36px; color:#fff; margin:0 auto 12px; }
-  .logo-title { font-family:'Bebas Neue'; font-size:32px; letter-spacing:3px; }
+  .logo-title { font-family:'Bebas Neue'; font-size:32px; letter-spacing:3px; text-align:center; }
   .join-form { width:100%; display:flex; flex-direction:column; gap:12px; }
-  .input-group { display:flex; flex-direction:column; gap:6px; }
-  .input-label { font-size:12px; letter-spacing:2px; color:var(--text-muted); text-transform:uppercase; }
-  .input-field { background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:14px 16px; color:var(--white); font-size:16px; font-family:'Be Vietnam Pro'; outline:none; transition:border-color .2s; }
+  .input-label { font-size:12px; letter-spacing:2px; color:var(--text-muted); text-transform:uppercase; margin-bottom:6px; display:block; }
+  .input-field { background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:14px 16px; color:var(--white); font-size:16px; font-family:'Be Vietnam Pro'; outline:none; transition:border-color .2s; width:100%; }
   .input-field:focus { border-color:var(--red); }
-  .btn-join { background:var(--red); color:#fff; border:none; border-radius:10px; padding:16px; font-size:17px; font-weight:800; cursor:pointer; font-family:'Be Vietnam Pro'; margin-top:8px; transition:all .2s; }
+  .btn-join { background:var(--red); color:#fff; border:none; border-radius:10px; padding:16px; font-size:17px; font-weight:800; cursor:pointer; font-family:'Be Vietnam Pro'; margin-top:8px; transition:all .2s; width:100%; }
   .btn-join:hover { background:var(--red-dark); }
 
   /* LOBBY */
@@ -33,9 +31,16 @@
   .pulse { animation:pulse 2s infinite; }
   @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
 
+  /* COUNTDOWN */
+  #countdown-screen { display:none; flex:1; flex-direction:column; align-items:center; justify-content:center; gap:16px; text-align:center; }
+  .cdlabel { font-size:14px; color:var(--text-muted); letter-spacing:3px; text-transform:uppercase; }
+  .cdnum { font-family:'Bebas Neue'; font-size:160px; color:var(--gold); line-height:1; animation:cdPop .8s ease; }
+  @keyframes cdPop { from{transform:scale(1.4);opacity:.4} to{transform:scale(1);opacity:1} }
+  .cdqinfo { font-size:14px; color:var(--text-muted); }
+
   /* QUESTION */
   #question-screen { display:none; flex:1; flex-direction:column; gap:16px; }
-  .timer-arc { text-align:center; padding:16px 0; }
+  .timer-arc { text-align:center; padding:8px 0; }
   .timer-big { font-family:'Bebas Neue'; font-size:64px; color:var(--white); line-height:1; }
   .timer-big.warning { color:var(--gold); }
   .timer-bar-wrap { height:6px; background:var(--surface2); border-radius:3px; overflow:hidden; }
@@ -46,7 +51,7 @@
   .q-type { font-size:12px; font-weight:700; padding:3px 10px; border-radius:12px; }
   .q-type.basic { color:var(--red); background:rgba(200,16,46,.15); }
   .q-type.advanced { color:var(--gold); background:rgba(245,166,35,.15); }
-  .q-text { background:var(--surface); border-radius:14px; padding:20px; font-size:15px; font-weight:600; line-height:1.6; text-align:center; border:1px solid var(--border); flex:1; min-height:80px; display:flex; align-items:center; justify-content:center; }
+  .q-text { background:var(--surface); border-radius:14px; padding:20px; font-size:15px; font-weight:600; line-height:1.6; text-align:center; border:1px solid var(--border); min-height:80px; display:flex; align-items:center; justify-content:center; }
   .ans-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
   .ans-btn { border-radius:14px; padding:18px 12px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; border:2px solid transparent; cursor:pointer; transition:all .15s; min-height:80px; font-family:'Be Vietnam Pro'; }
   .ans-btn:active { transform:scale(.96); }
@@ -60,10 +65,8 @@
   .ans-btn.selected.C { background:rgba(234,179,8,.4); border-color:rgb(234,179,8); }
   .ans-btn.selected.D { background:rgba(34,197,94,.4); border-color:rgb(34,197,94); }
   .ans-label { width:28px; height:28px; border-radius:6px; display:flex; align-items:center; justify-content:center; font-family:'Bebas Neue'; font-size:16px; }
-  .ans-btn.A .ans-label { background:rgb(239,68,68); }
-  .ans-btn.B .ans-label { background:rgb(59,130,246); }
-  .ans-btn.C .ans-label { background:rgb(234,179,8); color:#000; }
-  .ans-btn.D .ans-label { background:rgb(34,197,94); color:#000; }
+  .ans-btn.A .ans-label{background:rgb(239,68,68)} .ans-btn.B .ans-label{background:rgb(59,130,246)}
+  .ans-btn.C .ans-label{background:rgb(234,179,8);color:#000} .ans-btn.D .ans-label{background:rgb(34,197,94);color:#000}
   .ans-text { font-size:12px; font-weight:600; text-align:center; line-height:1.3; color:var(--text); }
 
   /* WAIT */
@@ -78,7 +81,7 @@
   .final-title { font-family:'Bebas Neue'; font-size:48px; color:var(--gold); }
   .final-score { font-size:16px; color:var(--text-muted); }
   .final-score span { color:var(--white); font-weight:700; font-size:28px; display:block; margin-top:4px; }
-  .final-rank-txt { font-size:15px; color:var(--text-muted); margin-top:4px; }
+  .final-rank-txt { font-size:15px; color:var(--text-muted); }
 
   .toast { position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:var(--surface2); border:1px solid var(--border); padding:10px 20px; border-radius:10px; font-size:13px; opacity:0; transition:opacity .3s; z-index:999; }
   .toast.show { opacity:1; }
@@ -88,19 +91,15 @@
 <div class="wrap">
 
   <div id="join-screen">
-    <div class="logo-big">
+    <div>
       <div class="logo-icon">SHB</div>
       <div class="logo-title">Quiz Challenge</div>
     </div>
     <div class="join-form">
-      <div class="input-group">
-        <div class="input-label">Họ và Tên</div>
-        <input type="text" class="input-field" id="name-input" placeholder="Nhập tên của bạn..." maxlength="30">
-      </div>
-      <div class="input-group">
-        <div class="input-label">Mã Phòng (PIN)</div>
-        <input type="text" class="input-field" id="pin-input" placeholder="Nhập mã 4 chữ số..." maxlength="4" inputmode="numeric">
-      </div>
+      <div><label class="input-label">Họ và Tên</label>
+        <input type="text" class="input-field" id="name-input" placeholder="Nhập tên của bạn..." maxlength="30"></div>
+      <div><label class="input-label">Mã Phòng (PIN)</label>
+        <input type="text" class="input-field" id="pin-input" placeholder="Nhập mã 4 chữ số..." maxlength="4" inputmode="numeric"></div>
       <button class="btn-join" onclick="joinGame()">Tham gia →</button>
     </div>
   </div>
@@ -109,6 +108,12 @@
     <div style="font-size:64px">⏳</div>
     <div class="lobby-name" id="lobby-name">Xin chào!</div>
     <div class="lobby-wait pulse">Đang chờ host bắt đầu...</div>
+  </div>
+
+  <div id="countdown-screen">
+    <div class="cdlabel">Chuẩn bị!</div>
+    <div class="cdnum" id="p-cdnum">3</div>
+    <div class="cdqinfo" id="p-cdqinfo"></div>
   </div>
 
   <div id="question-screen">
@@ -150,9 +155,8 @@ const db = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 let playerId='', playerName='';
 let sessionQuestions=[];
-let timerInterval=null, stateInterval=null;
-let questionStartTime=null, hasAnswered=false;
-let myScore=0;
+let timerInterval=null, stateInterval=null, countdownInterval=null;
+let questionStartTime=null, hasAnswered=false, myScore=0;
 let lastQIndex=-1, lastSession=-1, lastStatus='';
 
 async function joinGame() {
@@ -161,14 +165,13 @@ async function joinGame() {
   if (!name) { showToast('Vui lòng nhập tên!'); return; }
   if (!pin)  { showToast('Vui lòng nhập mã phòng!'); return; }
 
-  const {data:state} = await db.from('game_state').select('*').eq('id','current').single();
+  const {data:state,error} = await db.from('game_state').select('*').eq('id','current').single();
   if (!state || state.pin !== pin) { showToast('❌ Mã phòng không đúng!'); return; }
-  if (state.status !== 'lobby')    { showToast('❌ Game đã bắt đầu rồi!'); return; }
+  if (state.status !== 'lobby')   { showToast('❌ Game đã bắt đầu rồi!'); return; }
 
-  playerId   = 'p_'+Date.now()+'_'+Math.random().toString(36).substr(2,5);
+  playerId   = 'p_'+Date.now()+'_'+Math.random().toString(36).substr(2,6);
   playerName = name;
   await db.from('players').upsert({id:playerId, name:playerName, score:0});
-
   document.getElementById('lobby-name').textContent = `Xin chào, ${playerName}!`;
   showScreen('lobby-screen');
   startStatePolling();
@@ -180,38 +183,80 @@ function startStatePolling() {
     const {data:state} = await db.from('game_state').select('*').eq('id','current').single();
     if (!state) return;
 
-    if (state.status === 'question') {
-      const qChanged = state.question_index !== lastQIndex || state.session !== lastSession;
-      if (qChanged && state.session_questions) {
+    // ── COUNTDOWN: new question coming ────────────────────────────────────────
+    if (state.status === 'countdown') {
+      const isNew = state.question_index !== lastQIndex || state.session !== lastSession;
+      if (isNew && state.session_questions) {
         lastQIndex  = state.question_index;
         lastSession = state.session;
-        lastStatus  = 'question';
+        lastStatus  = 'countdown';
         hasAnswered = false;
-        // ── Use question list from Supabase (same as host) ──
-        sessionQuestions = state.session_questions;
-        questionStartTime = new Date(state.question_started_at).getTime();
-        showQuestion(state.question_index);
+        sessionQuestions = state.session_questions;   // sync from host
+        startCountdown(state.question_index, state.countdown_started_at);
       }
-    } else if (state.status === 'result' && lastStatus !== 'result') {
+    }
+
+    // ── QUESTION: timer starts ────────────────────────────────────────────────
+    else if (state.status === 'question' && lastStatus !== 'question') {
+      lastStatus = 'question';
+      clearInterval(countdownInterval);
+      // question_started_at set by host AFTER countdown → use as timer origin
+      questionStartTime = new Date(state.question_started_at).getTime();
+      showQuestion(state.question_index);
+    }
+
+    // ── RESULT ────────────────────────────────────────────────────────────────
+    else if (state.status === 'result' && lastStatus !== 'result') {
       lastStatus = 'result';
       clearInterval(timerInterval);
       if (!hasAnswered) showScreen('wait-screen');
-    } else if (state.status === 'lobby' && lastStatus === 'result') {
-      lastStatus = 'lobby';
+    }
+
+    // ── LOBBY (between sessions) ──────────────────────────────────────────────
+    else if (state.status === 'lobby' && lastStatus === 'result') {
+      lastStatus = 'lobby_break';
       showScreen('lobby-screen');
       document.querySelector('.lobby-wait').textContent = 'Chờ Session 2 bắt đầu...';
-    } else if (state.status === 'final' && lastStatus !== 'final') {
+    }
+
+    // ── FINAL ─────────────────────────────────────────────────────────────────
+    else if (state.status === 'final' && lastStatus !== 'final') {
       lastStatus = 'final';
       showFinal();
     }
-  }, 1500);
+  }, 1000); // poll every 1s for snappy sync
+}
+
+// ── COUNTDOWN on player side (visual only, synced to host time) ───────────────
+function startCountdown(idx, countdownStartedAt) {
+  clearInterval(countdownInterval);
+  const q = sessionQuestions[idx];
+  const adv = q && q._type === 'advanced';
+  document.getElementById('p-cdqinfo').textContent =
+    `Câu ${idx+1}/10 · ${adv ? '⭐ Nâng cao' : 'Cơ bản'}`;
+  showScreen('countdown-screen');
+
+  function tick() {
+    const elapsed = (Date.now() - new Date(countdownStartedAt).getTime()) / 1000;
+    const left    = Math.max(0, 3 - elapsed);
+    const display = Math.ceil(left);
+    const el      = document.getElementById('p-cdnum');
+    if (el.textContent !== String(display)) {
+      el.textContent = display;
+      el.style.animation = 'none';
+      void el.offsetWidth;
+      el.style.animation = 'cdPop .8s ease';
+    }
+    if (left <= 0) clearInterval(countdownInterval);
+  }
+  tick();
+  countdownInterval = setInterval(tick, 200);
 }
 
 function showQuestion(idx) {
   clearInterval(timerInterval);
   const q = sessionQuestions[idx];
   if (!q) return;
-
   const adv = q._type === 'advanced';
   document.getElementById('p-q-counter').textContent = `Câu ${idx+1}/10`;
   document.getElementById('p-q-type').textContent    = adv ? '⭐ NÂNG CAO' : 'CƠ BẢN';
@@ -221,8 +266,7 @@ function showQuestion(idx) {
   document.getElementById('p-ans-B').textContent     = q.B;
   document.getElementById('p-ans-C').textContent     = q.C;
   document.getElementById('p-ans-D').textContent     = q.D;
-
-  document.querySelectorAll('.ans-btn').forEach(b => { b.disabled=false; b.classList.remove('selected'); });
+  document.querySelectorAll('.ans-btn').forEach(b=>{ b.disabled=false; b.classList.remove('selected'); });
   showScreen('question-screen');
   startPlayerTimer();
 }
@@ -231,13 +275,14 @@ function startPlayerTimer() {
   clearInterval(timerInterval);
   const bar = document.getElementById('p-timer-bar');
   const num = document.getElementById('p-timer');
-
   timerInterval = setInterval(() => {
+    // elapsed from when host actually started the question (after countdown)
     const elapsed = (Date.now() - questionStartTime) / 1000;
     const left    = Math.max(0, 15 - elapsed);
     bar.style.width = (left/15*100)+'%';
     num.textContent = Math.ceil(left);
     if (left <= 5) { bar.className='timer-bar warning'; num.className='timer-big warning'; }
+    else           { bar.className='timer-bar'; num.className='timer-big'; }
     if (left <= 0) {
       clearInterval(timerInterval);
       if (!hasAnswered) { hasAnswered=true; showScreen('wait-screen'); }
@@ -250,13 +295,14 @@ async function submitAnswer(choice) {
   hasAnswered = true;
   clearInterval(timerInterval);
 
+  // elapsed from when HOST set question_started_at — accurate, no polling bias
   const elapsed = (Date.now() - questionStartTime) / 1000;
   const q = sessionQuestions[lastQIndex];
   let score = 0;
   if (choice === q.answer) {
     if      (elapsed < 5)  score = 2;
     else if (elapsed < 10) score = 1.75;
-    else                   score = 1.5;
+    else if (elapsed <= 15) score = 1.5;
   }
   myScore += score;
 
@@ -266,10 +312,10 @@ async function submitAnswer(choice) {
   await db.from('answers').insert({
     player_id:playerId, session:lastSession,
     question_index:lastQIndex, answer:choice,
-    answered_at:elapsed, score:score
+    answered_at: parseFloat(elapsed.toFixed(2)),
+    score:score
   });
   await db.from('players').update({score:myScore}).eq('id',playerId);
-
   setTimeout(()=>showScreen('wait-screen'), 400);
 }
 
@@ -277,7 +323,7 @@ async function showFinal() {
   clearInterval(stateInterval);
   const {data:lb} = await db.from('players').select('*').order('score',{ascending:false});
   const rank = lb ? lb.findIndex(p=>p.id===playerId)+1 : 0;
-  const medals = ['🥇','🥈','🥉'];
+  const medals=['🥇','🥈','🥉'];
   document.getElementById('final-medal').textContent     = medals[rank-1]||'🎉';
   document.getElementById('final-score-val').textContent = myScore.toFixed(2)+' điểm';
   document.getElementById('final-rank').textContent      = `Xếp hạng: ${rank} / ${lb?.length||0}`;
@@ -285,7 +331,7 @@ async function showFinal() {
 }
 
 function showScreen(id) {
-  ['join-screen','lobby-screen','question-screen','wait-screen','final-screen'].forEach(s=>{
+  ['join-screen','lobby-screen','countdown-screen','question-screen','wait-screen','final-screen'].forEach(s=>{
     document.getElementById(s).style.display='none';
   });
   document.getElementById(id).style.display='flex';
