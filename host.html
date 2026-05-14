@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SHB Quiz — Host</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root {
+    --red: #C8102E;
+    --red-dark: #9b0d22;
+    --gold: #F5A623;
+    --white: #FFFFFF;
+    --bg: #0a0a0f;
+    --surface: #13131a;
+    --surface2: #1e1e2a;
+    --border: rgba(255,255,255,0.08);
+    --text: #f0f0f0;
+    --text-muted: #888;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: 'Be Vietnam Pro', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* BG PATTERN */
+  body::before {
+    content:'';
+    position:fixed; inset:0;
+    background: radial-gradient(ellipse at 20% 50%, rgba(200,16,46,0.08) 0%, transparent 60%),
+                radial-gradient(ellipse at 80% 20%, rgba(245,166,35,0.05) 0%, transparent 50%);
+    pointer-events:none; z-index:0;
+  }
+
+  .container { position:relative; z-index:1; max-width:1200px; margin:0 auto; padding:20px; }
+
+  /* HEADER */
+  .header {
+    display:flex; align-items:center; justify-content:space-between;
+    padding:16px 24px;
+    background: var(--surface);
+    border-bottom: 2px solid var(--red);
+    margin-bottom:24px;
+    border-radius:12px;
+  }
+  .logo { display:flex; align-items:center; gap:12px; }
+  .logo-mark {
+    width:40px; height:40px; background:var(--red);
+    border-radius:8px; display:flex; align-items:center; justify-content:center;
+    font-family:'Bebas Neue'; font-size:22px; color:#fff;
+  }
+  .logo-text { font-family:'Bebas Neue'; font-size:24px; letter-spacing:2px; color:var(--white); }
+  .session-badge {
+    background: var(--red); color:#fff;
+    padding:6px 16px; border-radius:20px;
+    font-weight:700; font-size:14px; letter-spacing:1px;
+  }
+
+  /* LOBBY */
+  #lobby {
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    min-height:70vh; gap:32px;
+  }
+  .pin-display {
+    text-align:center;
+    background: var(--surface);
+    border:2px solid var(--border);
+    border-radius:20px;
+    padding:40px 60px;
+  }
+  .pin-label { font-size:14px; color:var(--text-muted); letter-spacing:3px; text-transform:uppercase; margin-bottom:8px; }
+  .pin-number {
+    font-family:'Bebas Neue'; font-size:96px; color:var(--gold);
+    line-height:1; letter-spacing:8px;
+  }
+  .pin-url { font-size:13px; color:var(--text-muted); margin-top:8px; }
+  .pin-url span { color:var(--white); font-weight:600; }
+
+  .player-list {
+    width:100%; max-width:700px;
+    background: var(--surface); border-radius:16px; padding:24px;
+    border:1px solid var(--border);
+  }
+  .player-list-title {
+    font-size:12px; letter-spacing:3px; color:var(--text-muted);
+    text-transform:uppercase; margin-bottom:16px;
+  }
+  .players-grid {
+    display:flex; flex-wrap:wrap; gap:10px;
+    min-height:60px;
+  }
+  .player-chip {
+    background: var(--surface2); border:1px solid var(--border);
+    padding:8px 16px; border-radius:30px;
+    font-size:14px; font-weight:600;
+    animation: popIn 0.3s ease;
+  }
+  @keyframes popIn {
+    from { transform:scale(0.5); opacity:0; }
+    to { transform:scale(1); opacity:1; }
+  }
+  .player-count { font-size:13px; color:var(--text-muted); margin-top:12px; }
+
+  .btn-start {
+    background: var(--red); color:#fff;
+    border:none; border-radius:12px;
+    padding:18px 48px; font-size:18px; font-weight:800;
+    cursor:pointer; letter-spacing:1px;
+    transition: all 0.2s;
+    font-family:'Be Vietnam Pro';
+  }
+  .btn-start:hover { background:var(--red-dark); transform:translateY(-2px); }
+  .btn-start:disabled { opacity:0.4; cursor:not-allowed; transform:none; }
+
+  /* QUESTION SCREEN */
+  #question-screen { display:none; }
+
+  .q-meta {
+    display:flex; align-items:center; justify-content:space-between;
+    margin-bottom:20px;
+  }
+  .q-counter {
+    font-family:'Bebas Neue'; font-size:20px; color:var(--text-muted); letter-spacing:2px;
+  }
+  .q-type-badge {
+    padding:4px 12px; border-radius:20px; font-size:12px; font-weight:700; letter-spacing:1px;
+  }
+  .q-type-basic { background:rgba(200,16,46,0.2); color:var(--red); border:1px solid var(--red); }
+  .q-type-advanced { background:rgba(245,166,35,0.2); color:var(--gold); border:1px solid var(--gold); }
+
+  .timer-bar-wrap {
+    height:8px; background:var(--surface2); border-radius:4px; overflow:hidden; margin-bottom:24px;
+  }
+  .timer-bar {
+    height:100%; background:var(--red);
+    border-radius:4px;
+    transition: width 1s linear, background 0.5s;
+  }
+  .timer-bar.warning { background:var(--gold); }
+
+  .timer-display {
+    text-align:center; margin-bottom:20px;
+  }
+  .timer-number {
+    font-family:'Bebas Neue'; font-size:72px; color:var(--white);
+    line-height:1;
+  }
+  .timer-number.warning { color:var(--gold); }
+
+  .question-box {
+    background: var(--surface);
+    border-radius:16px; padding:32px;
+    margin-bottom:24px;
+    border:1px solid var(--border);
+    text-align:center;
+  }
+  .question-text {
+    font-size:22px; font-weight:700; line-height:1.5;
+    color:var(--white);
+  }
+
+  .answers-grid {
+    display:grid; grid-template-columns:1fr 1fr;
+    gap:16px; margin-bottom:24px;
+  }
+  .answer-btn {
+    border-radius:12px; padding:20px 24px;
+    font-size:16px; font-weight:600;
+    display:flex; align-items:center; gap:12px;
+    border:2px solid transparent;
+    transition: all 0.2s;
+    cursor:default;
+  }
+  .answer-btn.A { background:rgba(239,68,68,0.15); border-color:rgba(239,68,68,0.3); }
+  .answer-btn.B { background:rgba(59,130,246,0.15); border-color:rgba(59,130,246,0.3); }
+  .answer-btn.C { background:rgba(234,179,8,0.15); border-color:rgba(234,179,8,0.3); }
+  .answer-btn.D { background:rgba(34,197,94,0.15); border-color:rgba(34,197,94,0.3); }
+  .answer-label {
+    width:32px; height:32px; border-radius:8px;
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Bebas Neue'; font-size:18px; flex-shrink:0;
+  }
+  .answer-btn.A .answer-label { background:rgb(239,68,68); }
+  .answer-btn.B .answer-label { background:rgb(59,130,246); }
+  .answer-btn.C .answer-label { background:rgb(234,179,8); color:#000; }
+  .answer-btn.D .answer-label { background:rgb(34,197,94); color:#000; }
+
+  /* Stats bar */
+  .stats-bar {
+    background: var(--surface); border-radius:12px; padding:16px 24px;
+    display:flex; align-items:center; justify-content:space-between;
+    margin-bottom:24px; border:1px solid var(--border);
+  }
+  .stat-item { text-align:center; }
+  .stat-num { font-family:'Bebas Neue'; font-size:32px; color:var(--white); }
+  .stat-label { font-size:11px; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px; }
+
+  /* RESULT SCREEN */
+  #result-screen { display:none; }
+
+  .answer-distribution {
+    background: var(--surface); border-radius:16px; padding:24px;
+    margin-bottom:24px; border:1px solid var(--border);
+  }
+  .dist-title { font-size:12px; letter-spacing:3px; color:var(--text-muted); text-transform:uppercase; margin-bottom:16px; }
+  .dist-bars { display:flex; gap:12px; align-items:flex-end; height:80px; }
+  .dist-bar-wrap { flex:1; display:flex; flex-direction:column; align-items:center; gap:6px; height:100%; justify-content:flex-end; }
+  .dist-bar { width:100%; border-radius:6px 6px 0 0; transition:height 0.5s ease; min-height:4px; }
+  .dist-bar.A { background:rgb(239,68,68); }
+  .dist-bar.B { background:rgb(59,130,246); }
+  .dist-bar.C { background:rgb(234,179,8); }
+  .dist-bar.D { background:rgb(34,197,94); }
+  .dist-label { font-family:'Bebas Neue'; font-size:16px; }
+  .dist-count { font-size:12px; color:var(--text-muted); }
+
+  /* LEADERBOARD */
+  .leaderboard {
+    background: var(--surface); border-radius:16px; padding:24px;
+    border:1px solid var(--border);
+  }
+  .lb-title { font-family:'Bebas Neue'; font-size:24px; letter-spacing:2px; margin-bottom:20px; color:var(--gold); }
+  .lb-row {
+    display:flex; align-items:center; gap:16px;
+    padding:12px 16px; border-radius:10px;
+    margin-bottom:8px; background:var(--surface2);
+    transition: all 0.3s;
+  }
+  .lb-rank { font-family:'Bebas Neue'; font-size:22px; width:32px; text-align:center; }
+  .lb-rank.gold { color:var(--gold); }
+  .lb-rank.silver { color:#C0C0C0; }
+  .lb-rank.bronze { color:#CD7F32; }
+  .lb-name { flex:1; font-weight:600; font-size:15px; }
+  .lb-score { font-family:'Bebas Neue'; font-size:22px; color:var(--gold); }
+
+  .btn-next {
+    width:100%; background:var(--red); color:#fff;
+    border:none; border-radius:12px;
+    padding:18px; font-size:18px; font-weight:800;
+    cursor:pointer; letter-spacing:1px;
+    transition: all 0.2s; margin-top:16px;
+    font-family:'Be Vietnam Pro';
+  }
+  .btn-next:hover { background:var(--red-dark); }
+
+  /* FINAL */
+  #final-screen { display:none; text-align:center; padding:40px 0; }
+  .final-title { font-family:'Bebas Neue'; font-size:64px; color:var(--gold); letter-spacing:4px; margin-bottom:8px; }
+  .final-sub { color:var(--text-muted); margin-bottom:32px; }
+
+  .btn-reset {
+    background: var(--surface2); color:var(--text);
+    border:1px solid var(--border); border-radius:12px;
+    padding:14px 32px; font-size:15px; font-weight:600;
+    cursor:pointer; margin-top:16px;
+    font-family:'Be Vietnam Pro';
+  }
+
+  /* TOAST */
+  .toast {
+    position:fixed; bottom:24px; left:50%; transform:translateX(-50%);
+    background:var(--surface2); border:1px solid var(--border);
+    padding:12px 24px; border-radius:10px; font-size:14px;
+    opacity:0; transition:opacity 0.3s; pointer-events:none; z-index:999;
+  }
+  .toast.show { opacity:1; }
+
+  .hidden { display:none !important; }
+</style>
+</head>
+<body>
+<div class="header">
+  <div class="logo">
+    <div class="logo-mark">SHB</div>
+    <div class="logo-text">Quiz Challenge</div>
+  </div>
+  <div class="session-badge" id="session-badge">LOBBY</div>
+</div>
+
+<div class="container">
+
+  <!-- LOBBY -->
+  <div id="lobby">
+    <div class="pin-display">
+      <div class="pin-label">Mã phòng thi</div>
+      <div class="pin-number" id="pin-display">----</div>
+      <div class="pin-url">Người chơi vào: <span id="player-url">...</span></div>
+    </div>
+    <div class="player-list">
+      <div class="player-list-title">Người chơi đã vào</div>
+      <div class="players-grid" id="players-grid"></div>
+      <div class="player-count" id="player-count">0 người chơi</div>
+    </div>
+    <button class="btn-start" id="btn-start" onclick="startSession(1)">
+      🚀 Bắt đầu Session 1
+    </button>
+  </div>
+
+  <!-- QUESTION -->
+  <div id="question-screen">
+    <div class="q-meta">
+      <div class="q-counter" id="q-counter">CÂU 1 / 10</div>
+      <div class="q-type-badge" id="q-type-badge">CƠ BẢN</div>
+    </div>
+    <div class="timer-bar-wrap">
+      <div class="timer-bar" id="timer-bar" style="width:100%"></div>
+    </div>
+    <div class="timer-display">
+      <div class="timer-number" id="timer-number">15</div>
+    </div>
+    <div class="stats-bar">
+      <div class="stat-item">
+        <div class="stat-num" id="answered-count">0</div>
+        <div class="stat-label">Đã trả lời</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num" id="total-count">0</div>
+        <div class="stat-label">Tổng người</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num" id="remaining-count">0</div>
+        <div class="stat-label">Chưa trả lời</div>
+      </div>
+    </div>
+    <div class="question-box">
+      <div class="question-text" id="question-text">Đang tải câu hỏi...</div>
+    </div>
+    <div class="answers-grid" id="answers-grid">
+      <div class="answer-btn A"><span class="answer-label">A</span><span id="ans-A"></span></div>
+      <div class="answer-btn B"><span class="answer-label">B</span><span id="ans-B"></span></div>
+      <div class="answer-btn C"><span class="answer-label">C</span><span id="ans-C"></span></div>
+      <div class="answer-btn D"><span class="answer-label">D</span><span id="ans-D"></span></div>
+    </div>
+  </div>
+
+  <!-- RESULT -->
+  <div id="result-screen">
+    <div class="answer-distribution">
+      <div class="dist-title">Phân bố câu trả lời</div>
+      <div class="dist-bars" id="dist-bars">
+        <div class="dist-bar-wrap"><div class="dist-bar A" id="bar-A" style="height:0%"></div><div class="dist-label">A</div><div class="dist-count" id="cnt-A">0</div></div>
+        <div class="dist-bar-wrap"><div class="dist-bar B" id="bar-B" style="height:0%"></div><div class="dist-label">B</div><div class="dist-count" id="cnt-B">0</div></div>
+        <div class="dist-bar-wrap"><div class="dist-bar C" id="bar-C" style="height:0%"></div><div class="dist-label">C</div><div class="dist-count" id="cnt-C">0</div></div>
+        <div class="dist-bar-wrap"><div class="dist-bar D" id="bar-D" style="height:0%"></div><div class="dist-label">D</div><div class="dist-count" id="cnt-D">0</div></div>
+      </div>
+    </div>
+    <div class="leaderboard">
+      <div class="lb-title">🏆 Bảng Xếp Hạng</div>
+      <div id="lb-list"></div>
+    </div>
+    <button class="btn-next" id="btn-next" onclick="nextQuestion()">Câu tiếp theo ▶</button>
+  </div>
+
+  <!-- FINAL -->
+  <div id="final-screen">
+    <div class="final-title">🏆 KẾT QUẢ CUỐI CÙNG</div>
+    <div class="final-sub">Vòng thi kết thúc — 2 Session hoàn thành</div>
+    <div class="leaderboard">
+      <div class="lb-title">Bảng Xếp Hạng Chung Cuộc</div>
+      <div id="final-lb-list"></div>
+    </div>
+    <button class="btn-reset" onclick="resetGame()">🔄 Tạo game mới</button>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const SUPABASE_URL = 'https://bqvpdddmgkjreqwcomav.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_Iq4aS_moYquCQhU1XpwJew_F9kwtOBm';
+const CSV_COBAN = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRJ4_gYsguWuoOOf9fqqFDlA_QkwDGnhQKmCIfia44Mx-jykPRnjqKqRMz-A4SBsV9qRvfGy7xgM5Yh/pub?gid=0&single=true&output=csv';
+const CSV_NANGCAO = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRJ4_gYsguWuoOOf9fqqFDlA_QkwDGnhQKmCIfia44Mx-jykPRnjqKqRMz-A4SBsV9qRvfGy7xgM5Yh/pub?gid=730343802&single=true&output=csv';
+
+const { createClient } = supabase;
+const db = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let questions = { coban: [], nangcao: [] };
+let sessionQuestions = [];
+let currentQIndex = 0;
+let currentSession = 1;
+let timerInterval = null;
+let timeLeft = 15;
+let players = [];
+let pollInterval = null;
+let gamePin = '';
+
+// Generate PIN
+function generatePin() {
+  return Math.floor(1000 + Math.random() * 9000).toString();
+}
+
+// Parse CSV
+function parseCSV(text) {
+  const lines = text.trim().split('\n');
+  const headers = lines[0].split(',').map(h => h.trim().replace(/"/g,''));
+  return lines.slice(1).map(line => {
+    const vals = line.split(',').map(v => v.trim().replace(/"/g,''));
+    const obj = {};
+    headers.forEach((h,i) => obj[h] = vals[i] || '');
+    return obj;
+  }).filter(q => q.id && q.question);
+}
+
+// Load questions
+async function loadQuestions() {
+  try {
+    const [r1, r2] = await Promise.all([
+      fetch(CSV_COBAN).then(r => r.text()),
+      fetch(CSV_NANGCAO).then(r => r.text())
+    ]);
+    questions.coban = parseCSV(r1);
+    questions.nangcao = parseCSV(r2);
+    showToast(`✅ Tải ${questions.coban.length} câu cơ bản, ${questions.nangcao.length} câu nâng cao`);
+  } catch(e) {
+    showToast('❌ Lỗi tải câu hỏi: ' + e.message);
+  }
+}
+
+// Shuffle & pick questions for session
+function buildSessionQuestions() {
+  const coban = [...questions.coban].sort(() => Math.random()-0.5).slice(0,8);
+  const nangcao = [...questions.nangcao].sort(() => Math.random()-0.5).slice(0,2);
+  return [...coban, ...nangcao].sort(() => Math.random()-0.5);
+}
+
+// Init
+async function init() {
+  gamePin = generatePin();
+  document.getElementById('pin-display').textContent = gamePin;
+
+  const baseUrl = window.location.href.replace('host.html','player.html');
+  document.getElementById('player-url').textContent = `${baseUrl}?pin=${gamePin}`;
+
+  await loadQuestions();
+
+  // Save pin to DB
+  await db.from('game_state').upsert({
+    id: 'current',
+    status: 'lobby',
+    session: 1,
+    question_index: 0,
+    pin: gamePin
+  });
+
+  // Clear old data
+  await db.from('players').delete().neq('id','__none__');
+  await db.from('answers').delete().neq('id',0);
+
+  startPolling();
+}
+
+// Poll for players
+function startPolling() {
+  pollInterval = setInterval(async () => {
+    const { data } = await db.from('players').select('*').order('joined_at');
+    if (data) {
+      players = data;
+      renderPlayers(data);
+    }
+  }, 2000);
+}
+
+function renderPlayers(list) {
+  const grid = document.getElementById('players-grid');
+  grid.innerHTML = list.map(p => `<div class="player-chip">👤 ${p.name}</div>`).join('');
+  document.getElementById('player-count').textContent = `${list.length} người chơi`;
+  document.getElementById('btn-start').disabled = list.length === 0;
+}
+
+async function startSession(session) {
+  currentSession = session;
+  sessionQuestions = buildSessionQuestions();
+  currentQIndex = 0;
+
+  clearInterval(pollInterval);
+  document.getElementById('session-badge').textContent = `SESSION ${session}`;
+
+  await db.from('game_state').upsert({
+    id: 'current',
+    status: 'question',
+    session: session,
+    question_index: 0,
+    question_started_at: new Date().toISOString()
+  });
+
+  showScreen('question-screen');
+  showQuestion(0);
+}
+
+function showQuestion(index) {
+  const q = sessionQuestions[index];
+  const isAdvanced = index >= 8;
+
+  document.getElementById('q-counter').textContent = `CÂU ${index+1} / 10`;
+  document.getElementById('q-type-badge').textContent = isAdvanced ? '⭐ NÂNG CAO' : 'CƠ BẢN';
+  document.getElementById('q-type-badge').className = `q-type-badge ${isAdvanced ? 'q-type-advanced' : 'q-type-basic'}`;
+  document.getElementById('question-text').textContent = q.question;
+  document.getElementById('ans-A').textContent = q.A;
+  document.getElementById('ans-B').textContent = q.B;
+  document.getElementById('ans-C').textContent = q.C;
+  document.getElementById('ans-D').textContent = q.D;
+
+  document.getElementById('total-count').textContent = players.length;
+  document.getElementById('answered-count').textContent = '0';
+  document.getElementById('remaining-count').textContent = players.length;
+
+  startTimer();
+  pollAnswers();
+}
+
+let answerPollInterval = null;
+
+function pollAnswers() {
+  clearInterval(answerPollInterval);
+  answerPollInterval = setInterval(async () => {
+    const { data } = await db.from('answers')
+      .select('*')
+      .eq('session', currentSession)
+      .eq('question_index', currentQIndex);
+
+    if (data) {
+      const count = data.length;
+      document.getElementById('answered-count').textContent = count;
+      document.getElementById('remaining-count').textContent = Math.max(0, players.length - count);
+
+      if (count >= players.length && players.length > 0) {
+        clearInterval(answerPollInterval);
+        endQuestion();
+      }
+    }
+  }, 1000);
+}
+
+function startTimer() {
+  timeLeft = 15;
+  clearInterval(timerInterval);
+
+  const bar = document.getElementById('timer-bar');
+  const num = document.getElementById('timer-number');
+
+  bar.style.width = '100%';
+  bar.className = 'timer-bar';
+  num.className = 'timer-number';
+
+  timerInterval = setInterval(() => {
+    timeLeft--;
+    bar.style.width = (timeLeft/15*100) + '%';
+    num.textContent = timeLeft;
+
+    if (timeLeft <= 5) {
+      bar.className = 'timer-bar warning';
+      num.className = 'timer-number warning';
+    }
+    if (timeLeft <= 0) {
+      clearInterval(timerInterval);
+      clearInterval(answerPollInterval);
+      endQuestion();
+    }
+  }, 1000);
+}
+
+async function endQuestion() {
+  clearInterval(timerInterval);
+  clearInterval(answerPollInterval);
+
+  // Update state
+  await db.from('game_state').upsert({ id:'current', status:'result' });
+
+  // Get answers for distribution
+  const { data: answers } = await db.from('answers')
+    .select('*')
+    .eq('session', currentSession)
+    .eq('question_index', currentQIndex);
+
+  // Get leaderboard
+  const { data: lb } = await db.from('players').select('*').order('score', { ascending:false });
+
+  showScreen('result-screen');
+  renderDistribution(answers || []);
+  renderLeaderboard(lb || [], 'lb-list');
+
+  // Update btn text
+  const isLastQ = currentQIndex >= 9;
+  const isLastSession = currentSession >= 2;
+  const btnNext = document.getElementById('btn-next');
+
+  if (isLastQ && isLastSession) {
+    btnNext.textContent = '🏆 Xem kết quả cuối cùng';
+  } else if (isLastQ) {
+    btnNext.textContent = `🚀 Bắt đầu Session 2`;
+  } else {
+    btnNext.textContent = `Câu tiếp theo ▶ (${currentQIndex+2}/10)`;
+  }
+}
+
+function renderDistribution(answers) {
+  const counts = { A:0, B:0, C:0, D:0 };
+  answers.forEach(a => { if (counts[a.answer] !== undefined) counts[a.answer]++; });
+  const max = Math.max(...Object.values(counts), 1);
+
+  ['A','B','C','D'].forEach(k => {
+    document.getElementById(`bar-${k}`).style.height = (counts[k]/max*100) + '%';
+    document.getElementById(`cnt-${k}`).textContent = counts[k];
+  });
+}
+
+function renderLeaderboard(list, containerId) {
+  const ranks = ['🥇','🥈','🥉'];
+  const rankClass = ['gold','silver','bronze'];
+  document.getElementById(containerId).innerHTML = list.slice(0,10).map((p,i) => `
+    <div class="lb-row">
+      <div class="lb-rank ${rankClass[i]||''}">${ranks[i]||i+1}</div>
+      <div class="lb-name">${p.name}</div>
+      <div class="lb-score">${p.score.toFixed(2)}</div>
+    </div>
+  `).join('');
+}
+
+async function nextQuestion() {
+  const isLastQ = currentQIndex >= 9;
+  const isLastSession = currentSession >= 2;
+
+  if (isLastQ && isLastSession) {
+    showFinal();
+    return;
+  }
+
+  if (isLastQ) {
+    // Between sessions
+    showScreen('lobby');
+    document.getElementById('session-badge').textContent = 'NGHỈ GIẢI LAO';
+    document.getElementById('btn-start').textContent = '🚀 Bắt đầu Session 2';
+    document.getElementById('btn-start').onclick = () => startSession(2);
+    document.getElementById('btn-start').disabled = false;
+
+    // Show leaderboard in lobby area
+    const { data: lb } = await db.from('players').select('*').order('score', { ascending:false });
+    renderPlayers(players);
+    return;
+  }
+
+  currentQIndex++;
+  await db.from('game_state').upsert({
+    id:'current',
+    status:'question',
+    question_index: currentQIndex,
+    question_started_at: new Date().toISOString()
+  });
+
+  showScreen('question-screen');
+  showQuestion(currentQIndex);
+}
+
+async function showFinal() {
+  await db.from('game_state').upsert({ id:'current', status:'final' });
+  const { data: lb } = await db.from('players').select('*').order('score', { ascending:false });
+  showScreen('final-screen');
+  renderLeaderboard(lb || [], 'final-lb-list');
+}
+
+async function resetGame() {
+  await db.from('players').delete().neq('id','__none__');
+  await db.from('answers').delete().neq('id',0);
+  window.location.reload();
+}
+
+function showScreen(id) {
+  ['lobby','question-screen','result-screen','final-screen'].forEach(s => {
+    document.getElementById(s).style.display = 'none';
+  });
+  document.getElementById(id).style.display = 'flex';
+  if (id === 'question-screen' || id === 'result-screen' || id === 'final-screen') {
+    document.getElementById(id).style.display = 'block';
+  }
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+init();
+</script>
+</body>
+</html>
