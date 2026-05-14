@@ -7,222 +7,203 @@
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-  :root { --red:#C8102E; --red-dark:#9b0d22; --gold:#F5A623; --white:#FFFFFF; --bg:#0a0a0f; --surface:#13131a; --surface2:#1e1e2a; --border:rgba(255,255,255,0.08); --text:#f0f0f0; --text-muted:#888; }
-  * { margin:0; padding:0; box-sizing:border-box; }
-  body { font-family:'Be Vietnam Pro',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; overflow-x:hidden; }
-  body::before { content:''; position:fixed; inset:0; background:radial-gradient(ellipse at 20% 50%,rgba(200,16,46,.08) 0%,transparent 60%),radial-gradient(ellipse at 80% 20%,rgba(245,166,35,.05) 0%,transparent 50%); pointer-events:none; z-index:0; }
-  .container { position:relative; z-index:1; max-width:1200px; margin:0 auto; padding:20px; }
-  .header { display:flex; align-items:center; justify-content:space-between; padding:16px 24px; background:var(--surface); border-bottom:2px solid var(--red); margin-bottom:24px; border-radius:12px; }
-  .logo { display:flex; align-items:center; gap:12px; }
-  .logo-mark { width:40px; height:40px; background:var(--red); border-radius:8px; display:flex; align-items:center; justify-content:center; font-family:'Bebas Neue'; font-size:22px; color:#fff; }
-  .logo-text { font-family:'Bebas Neue'; font-size:24px; letter-spacing:2px; color:var(--white); }
-  .session-badge { background:var(--red); color:#fff; padding:6px 16px; border-radius:20px; font-weight:700; font-size:14px; letter-spacing:1px; }
+  :root{--red:#C8102E;--red-dark:#9b0d22;--gold:#F5A623;--white:#FFF;--bg:#0a0a0f;--surface:#13131a;--surface2:#1e1e2a;--border:rgba(255,255,255,.08);--text:#f0f0f0;--muted:#888}
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'Be Vietnam Pro',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+  body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at 20% 50%,rgba(200,16,46,.08) 0%,transparent 60%),radial-gradient(ellipse at 80% 20%,rgba(245,166,35,.05) 0%,transparent 50%);pointer-events:none;z-index:0}
+  .wrap{position:relative;z-index:1;max-width:1200px;margin:0 auto;padding:20px}
+  .header{display:flex;align-items:center;justify-content:space-between;padding:16px 24px;background:var(--surface);border-bottom:2px solid var(--red);margin-bottom:24px;border-radius:12px}
+  .logo{display:flex;align-items:center;gap:12px}
+  .logo-mark{width:40px;height:40px;background:var(--red);border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue';font-size:22px;color:#fff}
+  .logo-text{font-family:'Bebas Neue';font-size:24px;letter-spacing:2px}
+  .badge{background:var(--red);color:#fff;padding:6px 16px;border-radius:20px;font-weight:700;font-size:14px;letter-spacing:1px}
 
   /* LOBBY */
-  #lobby { display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:70vh; gap:32px; }
-  .pin-display { text-align:center; background:var(--surface); border:2px solid var(--border); border-radius:20px; padding:40px 60px; }
-  .pin-label { font-size:14px; color:var(--text-muted); letter-spacing:3px; text-transform:uppercase; margin-bottom:8px; }
-  .pin-number { font-family:'Bebas Neue'; font-size:96px; color:var(--gold); line-height:1; letter-spacing:8px; }
-  .pin-url { font-size:13px; color:var(--text-muted); margin-top:8px; }
-  .pin-url span { color:var(--white); font-weight:600; }
-  .player-list { width:100%; max-width:700px; background:var(--surface); border-radius:16px; padding:24px; border:1px solid var(--border); }
-  .player-list-title { font-size:12px; letter-spacing:3px; color:var(--text-muted); text-transform:uppercase; margin-bottom:16px; }
-  .players-grid { display:flex; flex-wrap:wrap; gap:10px; min-height:60px; }
-  .player-chip { background:var(--surface2); border:1px solid var(--border); padding:8px 16px; border-radius:30px; font-size:14px; font-weight:600; animation:popIn .3s ease; }
-  @keyframes popIn { from{transform:scale(.5);opacity:0} to{transform:scale(1);opacity:1} }
-  .player-count { font-size:13px; color:var(--text-muted); margin-top:12px; }
-  .btn-start { background:var(--red); color:#fff; border:none; border-radius:12px; padding:18px 48px; font-size:18px; font-weight:800; cursor:pointer; letter-spacing:1px; transition:all .2s; font-family:'Be Vietnam Pro'; }
-  .btn-start:hover { background:var(--red-dark); transform:translateY(-2px); }
-  .btn-start:disabled { opacity:.4; cursor:not-allowed; transform:none; }
+  #s-lobby{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:70vh;gap:32px}
+  .pin-box{text-align:center;background:var(--surface);border:2px solid var(--border);border-radius:20px;padding:40px 60px}
+  .pin-lbl{font-size:13px;color:var(--muted);letter-spacing:3px;text-transform:uppercase;margin-bottom:8px}
+  .pin-num{font-family:'Bebas Neue';font-size:96px;color:var(--gold);line-height:1;letter-spacing:8px}
+  .pin-url{font-size:13px;color:var(--muted);margin-top:8px}.pin-url span{color:var(--white);font-weight:700}
+  .plist{width:100%;max-width:700px;background:var(--surface);border-radius:16px;padding:24px;border:1px solid var(--border)}
+  .plist-title{font-size:11px;letter-spacing:3px;color:var(--muted);text-transform:uppercase;margin-bottom:16px}
+  .pgrid{display:flex;flex-wrap:wrap;gap:10px;min-height:60px}
+  .chip{background:var(--surface2);border:1px solid var(--border);padding:8px 16px;border-radius:30px;font-size:14px;font-weight:600;animation:popIn .3s ease}
+  @keyframes popIn{from{transform:scale(.5);opacity:0}to{transform:scale(1);opacity:1}}
+  .pcnt{font-size:13px;color:var(--muted);margin-top:12px}
+  .btn-red{background:var(--red);color:#fff;border:none;border-radius:12px;padding:18px 48px;font-size:18px;font-weight:800;cursor:pointer;letter-spacing:1px;transition:all .2s;font-family:'Be Vietnam Pro'}
+  .btn-red:hover{background:var(--red-dark);transform:translateY(-2px)}
+  .btn-red:disabled{opacity:.4;cursor:not-allowed;transform:none}
 
   /* COUNTDOWN */
-  #countdown-screen { display:none; text-align:center; padding:80px 0; }
-  .countdown-label { font-size:16px; color:var(--text-muted); letter-spacing:3px; text-transform:uppercase; margin-bottom:16px; }
-  .countdown-number { font-family:'Bebas Neue'; font-size:180px; color:var(--gold); line-height:1; animation:countPulse .8s ease; }
-  @keyframes countPulse { from{transform:scale(1.3);opacity:.5} to{transform:scale(1);opacity:1} }
-  .countdown-q { font-size:16px; color:var(--text-muted); margin-top:16px; }
+  #s-cd{display:none;text-align:center;padding:80px 0}
+  .cd-lbl{font-size:15px;color:var(--muted);letter-spacing:3px;text-transform:uppercase;margin-bottom:8px}
+  .cd-num{font-family:'Bebas Neue';font-size:180px;color:var(--gold);line-height:1}
+  .cd-info{font-size:15px;color:var(--muted);margin-top:12px}
 
   /* QUESTION */
-  #question-screen { display:none; }
-  .q-meta { display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; }
-  .q-counter { font-family:'Bebas Neue'; font-size:20px; color:var(--text-muted); letter-spacing:2px; }
-  .q-type-badge { padding:4px 12px; border-radius:20px; font-size:12px; font-weight:700; letter-spacing:1px; }
-  .q-type-basic { background:rgba(200,16,46,.2); color:var(--red); border:1px solid var(--red); }
-  .q-type-advanced { background:rgba(245,166,35,.2); color:var(--gold); border:1px solid var(--gold); }
-  .timer-bar-wrap { height:8px; background:var(--surface2); border-radius:4px; overflow:hidden; margin-bottom:24px; }
-  .timer-bar { height:100%; background:var(--red); border-radius:4px; transition:width 1s linear,background .5s; }
-  .timer-bar.warning { background:var(--gold); }
-  .timer-display { text-align:center; margin-bottom:20px; }
-  .timer-number { font-family:'Bebas Neue'; font-size:72px; color:var(--white); line-height:1; }
-  .timer-number.warning { color:var(--gold); }
-  .question-box { background:var(--surface); border-radius:16px; padding:32px; margin-bottom:24px; border:1px solid var(--border); text-align:center; }
-  .question-text { font-size:22px; font-weight:700; line-height:1.5; color:var(--white); }
-  .answers-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:24px; }
-  .answer-btn { border-radius:12px; padding:20px 24px; font-size:16px; font-weight:600; display:flex; align-items:center; gap:12px; border:2px solid transparent; cursor:default; }
-  .answer-btn.A { background:rgba(239,68,68,.15); border-color:rgba(239,68,68,.3); }
-  .answer-btn.B { background:rgba(59,130,246,.15); border-color:rgba(59,130,246,.3); }
-  .answer-btn.C { background:rgba(234,179,8,.15); border-color:rgba(234,179,8,.3); }
-  .answer-btn.D { background:rgba(34,197,94,.15); border-color:rgba(34,197,94,.3); }
-  .answer-label { width:32px; height:32px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-family:'Bebas Neue'; font-size:18px; flex-shrink:0; }
-  .answer-btn.A .answer-label { background:rgb(239,68,68); }
-  .answer-btn.B .answer-label { background:rgb(59,130,246); }
-  .answer-btn.C .answer-label { background:rgb(234,179,8); color:#000; }
-  .answer-btn.D .answer-label { background:rgb(34,197,94); color:#000; }
-  .stats-bar { background:var(--surface); border-radius:12px; padding:16px 24px; display:flex; align-items:center; justify-content:space-between; margin-bottom:24px; border:1px solid var(--border); }
-  .stat-item { text-align:center; }
-  .stat-num { font-family:'Bebas Neue'; font-size:32px; color:var(--white); }
-  .stat-label { font-size:11px; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px; }
+  #s-q{display:none}
+  .qmeta{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+  .qcnt{font-family:'Bebas Neue';font-size:20px;color:var(--muted);letter-spacing:2px}
+  .qtag{padding:4px 12px;border-radius:20px;font-size:12px;font-weight:700;letter-spacing:1px}
+  .qtag.basic{background:rgba(200,16,46,.2);color:var(--red);border:1px solid var(--red)}
+  .qtag.adv{background:rgba(245,166,35,.2);color:var(--gold);border:1px solid var(--gold)}
+  .tbar-wrap{height:8px;background:var(--surface2);border-radius:4px;overflow:hidden;margin-bottom:24px}
+  .tbar{height:100%;background:var(--red);border-radius:4px;transition:width 1s linear,background .5s}
+  .tbar.warn{background:var(--gold)}
+  .tnum-wrap{text-align:center;margin-bottom:20px}
+  .tnum{font-family:'Bebas Neue';font-size:72px;color:var(--white);line-height:1}
+  .tnum.warn{color:var(--gold)}
+  .qbox{background:var(--surface);border-radius:16px;padding:32px;margin-bottom:24px;border:1px solid var(--border);text-align:center}
+  .qtxt{font-size:22px;font-weight:700;line-height:1.5}
+  .agrid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px}
+  .abtn{border-radius:12px;padding:20px 24px;font-size:16px;font-weight:600;display:flex;align-items:center;gap:12px;border:2px solid transparent;cursor:default}
+  .abtn.A{background:rgba(239,68,68,.15);border-color:rgba(239,68,68,.3)}
+  .abtn.B{background:rgba(59,130,246,.15);border-color:rgba(59,130,246,.3)}
+  .abtn.C{background:rgba(234,179,8,.15);border-color:rgba(234,179,8,.3)}
+  .abtn.D{background:rgba(34,197,94,.15);border-color:rgba(34,197,94,.3)}
+  .albl{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue';font-size:18px;flex-shrink:0}
+  .abtn.A .albl{background:rgb(239,68,68)}.abtn.B .albl{background:rgb(59,130,246)}
+  .abtn.C .albl{background:rgb(234,179,8);color:#000}.abtn.D .albl{background:rgb(34,197,94);color:#000}
+  .sbar{background:var(--surface);border-radius:12px;padding:16px 24px;display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;border:1px solid var(--border)}
+  .si{text-align:center}.sn{font-family:'Bebas Neue';font-size:32px}.sl{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px}
 
   /* RESULT */
-  #result-screen { display:none; }
-  .answer-distribution { background:var(--surface); border-radius:16px; padding:24px; margin-bottom:24px; border:1px solid var(--border); }
-  .dist-title { font-size:12px; letter-spacing:3px; color:var(--text-muted); text-transform:uppercase; margin-bottom:16px; }
-  .dist-bars { display:flex; gap:12px; align-items:flex-end; height:80px; }
-  .dist-bar-wrap { flex:1; display:flex; flex-direction:column; align-items:center; gap:6px; height:100%; justify-content:flex-end; }
-  .dist-bar { width:100%; border-radius:6px 6px 0 0; transition:height .5s ease; min-height:4px; }
-  .dist-bar.A{background:rgb(239,68,68)} .dist-bar.B{background:rgb(59,130,246)} .dist-bar.C{background:rgb(234,179,8)} .dist-bar.D{background:rgb(34,197,94)}
-  .dist-label { font-family:'Bebas Neue'; font-size:16px; }
-  .dist-count { font-size:12px; color:var(--text-muted); }
-  .leaderboard { background:var(--surface); border-radius:16px; padding:24px; border:1px solid var(--border); }
-  .lb-title { font-family:'Bebas Neue'; font-size:24px; letter-spacing:2px; margin-bottom:20px; color:var(--gold); }
-  .lb-row { display:flex; align-items:center; gap:12px; padding:12px 16px; border-radius:10px; margin-bottom:8px; background:var(--surface2); }
-  .lb-rank { font-family:'Bebas Neue'; font-size:22px; width:32px; text-align:center; }
-  .lb-rank.gold{color:var(--gold)} .lb-rank.silver{color:#C0C0C0} .lb-rank.bronze{color:#CD7F32}
-  .lb-name { flex:1; font-weight:600; font-size:15px; }
-  .lb-score { font-family:'Bebas Neue'; font-size:22px; color:var(--gold); }
-  .lb-time { font-size:12px; color:var(--text-muted); min-width:60px; text-align:right; }
-  .btn-next { width:100%; background:var(--red); color:#fff; border:none; border-radius:12px; padding:18px; font-size:18px; font-weight:800; cursor:pointer; letter-spacing:1px; transition:all .2s; margin-top:16px; font-family:'Be Vietnam Pro'; }
-  .btn-next:hover { background:var(--red-dark); }
+  #s-result{display:none}
+  .distbox{background:var(--surface);border-radius:16px;padding:24px;margin-bottom:24px;border:1px solid var(--border)}
+  .dist-ttl{font-size:11px;letter-spacing:3px;color:var(--muted);text-transform:uppercase;margin-bottom:16px}
+  .dbars{display:flex;gap:12px;align-items:flex-end;height:80px}
+  .dbar-w{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;height:100%;justify-content:flex-end}
+  .dbar{width:100%;border-radius:6px 6px 0 0;transition:height .5s;min-height:4px}
+  .dbar.A{background:rgb(239,68,68)}.dbar.B{background:rgb(59,130,246)}.dbar.C{background:rgb(234,179,8)}.dbar.D{background:rgb(34,197,94)}
+  .dlbl{font-family:'Bebas Neue';font-size:16px}.dcnt{font-size:12px;color:var(--muted)}
+  .lbbox{background:var(--surface);border-radius:16px;padding:24px;border:1px solid var(--border)}
+  .lb-ttl{font-family:'Bebas Neue';font-size:24px;letter-spacing:2px;margin-bottom:20px;color:var(--gold)}
+  .lbrow{display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:10px;margin-bottom:8px;background:var(--surface2)}
+  .lbrank{font-family:'Bebas Neue';font-size:22px;width:32px;text-align:center}
+  .lbrank.gold{color:var(--gold)}.lbrank.silver{color:#C0C0C0}.lbrank.bronze{color:#CD7F32}
+  .lbname{flex:1;font-weight:600;font-size:15px}
+  .lbscore{font-family:'Bebas Neue';font-size:22px;color:var(--gold)}
+  .lbtime{font-size:12px;color:var(--muted);min-width:60px;text-align:right}
+  .btn-next{width:100%;background:var(--red);color:#fff;border:none;border-radius:12px;padding:18px;font-size:18px;font-weight:800;cursor:pointer;letter-spacing:1px;transition:all .2s;margin-top:16px;font-family:'Be Vietnam Pro'}
+  .btn-next:hover{background:var(--red-dark)}
 
   /* FINAL */
-  #final-screen { display:none; padding:20px 0; }
-  .final-title { font-family:'Bebas Neue'; font-size:48px; color:var(--gold); letter-spacing:4px; margin-bottom:4px; text-align:center; }
-  .final-sub { color:var(--text-muted); margin-bottom:24px; text-align:center; font-size:14px; }
-  .btn-export { background:var(--gold); color:#000; border:none; border-radius:12px; padding:14px 32px; font-size:15px; font-weight:800; cursor:pointer; margin-top:16px; width:100%; font-family:'Be Vietnam Pro'; }
-  .btn-reset { background:var(--surface2); color:var(--text); border:1px solid var(--border); border-radius:12px; padding:14px 32px; font-size:15px; font-weight:600; cursor:pointer; margin-top:10px; width:100%; font-family:'Be Vietnam Pro'; }
+  #s-final{display:none;padding:20px 0}
+  .final-ttl{font-family:'Bebas Neue';font-size:48px;color:var(--gold);letter-spacing:4px;margin-bottom:4px;text-align:center}
+  .final-sub{color:var(--muted);margin-bottom:24px;text-align:center;font-size:14px}
+  .btn-gold{background:var(--gold);color:#000;border:none;border-radius:12px;padding:14px 32px;font-size:15px;font-weight:800;cursor:pointer;margin-top:16px;width:100%;font-family:'Be Vietnam Pro'}
+  .btn-gray{background:var(--surface2);color:var(--text);border:1px solid var(--border);border-radius:12px;padding:14px 32px;font-size:15px;font-weight:600;cursor:pointer;margin-top:10px;width:100%;font-family:'Be Vietnam Pro'}
 
-  .toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%); background:var(--surface2); border:1px solid var(--border); padding:12px 24px; border-radius:10px; font-size:14px; opacity:0; transition:opacity .3s; pointer-events:none; z-index:999; white-space:nowrap; }
-  .toast.show { opacity:1; }
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--surface2);border:1px solid var(--border);padding:12px 24px;border-radius:10px;font-size:14px;opacity:0;transition:opacity .3s;pointer-events:none;z-index:999;white-space:nowrap}
+  .toast.show{opacity:1}
 </style>
 </head>
 <body>
 <div class="header">
   <div class="logo"><div class="logo-mark">SHB</div><div class="logo-text">Quiz Challenge</div></div>
-  <div class="session-badge" id="session-badge">LOBBY</div>
+  <div class="badge" id="badge">LOBBY</div>
 </div>
-<div class="container">
+<div class="wrap">
 
-  <div id="lobby">
-    <div class="pin-display">
-      <div class="pin-label">Mã phòng thi</div>
-      <div class="pin-number" id="pin-display">----</div>
-      <div class="pin-url">Người chơi vào: <span id="player-url">...</span></div>
+  <div id="s-lobby">
+    <div class="pin-box">
+      <div class="pin-lbl">Mã phòng thi</div>
+      <div class="pin-num" id="pin-num">----</div>
+      <div class="pin-url">Người chơi vào: <span id="pin-url">...</span></div>
     </div>
-    <div class="player-list">
-      <div class="player-list-title">Người chơi đã vào</div>
-      <div class="players-grid" id="players-grid"></div>
-      <div class="player-count" id="player-count">0 người chơi</div>
+    <div class="plist">
+      <div class="plist-title">Người chơi đã vào</div>
+      <div class="pgrid" id="pgrid"></div>
+      <div class="pcnt" id="pcnt">0 người chơi</div>
     </div>
-    <button class="btn-start" id="btn-start" onclick="startSession(1)" disabled>🚀 Bắt đầu Session 1</button>
+    <button class="btn-red" id="btn-start" onclick="startSession(1)" disabled>🚀 Bắt đầu Session 1</button>
   </div>
 
-  <div id="countdown-screen">
-    <div class="countdown-label">Câu hỏi tiếp theo</div>
-    <div class="countdown-number" id="countdown-num">3</div>
-    <div class="countdown-q" id="countdown-q-info"></div>
+  <div id="s-cd">
+    <div class="cd-lbl">Câu hỏi tiếp theo</div>
+    <div class="cd-num" id="cd-num">3</div>
+    <div class="cd-info" id="cd-info"></div>
   </div>
 
-  <div id="question-screen">
-    <div class="q-meta">
-      <div class="q-counter" id="q-counter">CÂU 1 / 10</div>
-      <div class="q-type-badge q-type-basic" id="q-type-badge">CƠ BẢN</div>
+  <div id="s-q">
+    <div class="qmeta">
+      <div class="qcnt" id="qcnt">CÂU 1 / 10</div>
+      <div class="qtag basic" id="qtag">CƠ BẢN</div>
     </div>
-    <div class="timer-bar-wrap"><div class="timer-bar" id="timer-bar" style="width:100%"></div></div>
-    <div class="timer-display"><div class="timer-number" id="timer-number">15</div></div>
-    <div class="stats-bar">
-      <div class="stat-item"><div class="stat-num" id="answered-count">0</div><div class="stat-label">Đã trả lời</div></div>
-      <div class="stat-item"><div class="stat-num" id="total-count">0</div><div class="stat-label">Tổng người</div></div>
-      <div class="stat-item"><div class="stat-num" id="remaining-count">0</div><div class="stat-label">Chưa trả lời</div></div>
+    <div class="tbar-wrap"><div class="tbar" id="tbar" style="width:100%"></div></div>
+    <div class="tnum-wrap"><div class="tnum" id="tnum">15</div></div>
+    <div class="sbar">
+      <div class="si"><div class="sn" id="s-ans">0</div><div class="sl">Đã trả lời</div></div>
+      <div class="si"><div class="sn" id="s-total">0</div><div class="sl">Tổng người</div></div>
+      <div class="si"><div class="sn" id="s-rem">0</div><div class="sl">Chưa trả lời</div></div>
     </div>
-    <div class="question-box"><div class="question-text" id="question-text">Đang tải...</div></div>
-    <div class="answers-grid">
-      <div class="answer-btn A"><span class="answer-label">A</span><span id="ans-A"></span></div>
-      <div class="answer-btn B"><span class="answer-label">B</span><span id="ans-B"></span></div>
-      <div class="answer-btn C"><span class="answer-label">C</span><span id="ans-C"></span></div>
-      <div class="answer-btn D"><span class="answer-label">D</span><span id="ans-D"></span></div>
+    <div class="qbox"><div class="qtxt" id="qtxt">Đang tải...</div></div>
+    <div class="agrid">
+      <div class="abtn A"><span class="albl">A</span><span id="a-A"></span></div>
+      <div class="abtn B"><span class="albl">B</span><span id="a-B"></span></div>
+      <div class="abtn C"><span class="albl">C</span><span id="a-C"></span></div>
+      <div class="abtn D"><span class="albl">D</span><span id="a-D"></span></div>
     </div>
   </div>
 
-  <div id="result-screen">
-    <div class="answer-distribution">
-      <div class="dist-title">Phân bố câu trả lời</div>
-      <div class="dist-bars">
-        <div class="dist-bar-wrap"><div class="dist-bar A" id="bar-A" style="height:0"></div><div class="dist-label">A</div><div class="dist-count" id="cnt-A">0</div></div>
-        <div class="dist-bar-wrap"><div class="dist-bar B" id="bar-B" style="height:0"></div><div class="dist-label">B</div><div class="dist-count" id="cnt-B">0</div></div>
-        <div class="dist-bar-wrap"><div class="dist-bar C" id="bar-C" style="height:0"></div><div class="dist-label">C</div><div class="dist-count" id="cnt-C">0</div></div>
-        <div class="dist-bar-wrap"><div class="dist-bar D" id="bar-D" style="height:0"></div><div class="dist-label">D</div><div class="dist-count" id="cnt-D">0</div></div>
+  <div id="s-result">
+    <div class="distbox">
+      <div class="dist-ttl">Phân bố câu trả lời</div>
+      <div class="dbars">
+        <div class="dbar-w"><div class="dbar A" id="bar-A" style="height:0"></div><div class="dlbl">A</div><div class="dcnt" id="cnt-A">0</div></div>
+        <div class="dbar-w"><div class="dbar B" id="bar-B" style="height:0"></div><div class="dlbl">B</div><div class="dcnt" id="cnt-B">0</div></div>
+        <div class="dbar-w"><div class="dbar C" id="bar-C" style="height:0"></div><div class="dlbl">C</div><div class="dcnt" id="cnt-C">0</div></div>
+        <div class="dbar-w"><div class="dbar D" id="bar-D" style="height:0"></div><div class="dlbl">D</div><div class="dcnt" id="cnt-D">0</div></div>
       </div>
     </div>
-    <div class="leaderboard">
-      <div class="lb-title">🏆 Bảng Xếp Hạng</div>
-      <div id="lb-list"></div>
-    </div>
-    <button class="btn-next" id="btn-next" onclick="nextQuestion()">Câu tiếp theo ▶</button>
+    <div class="lbbox"><div class="lb-ttl">🏆 Bảng Xếp Hạng</div><div id="lb-mid"></div></div>
+    <button class="btn-next" id="btn-next" onclick="nextQ()">Câu tiếp theo ▶</button>
   </div>
 
-  <div id="final-screen">
-    <div class="final-title">🏆 KẾT QUẢ CUỐI CÙNG</div>
+  <div id="s-final">
+    <div class="final-ttl">🏆 KẾT QUẢ CUỐI CÙNG</div>
     <div class="final-sub">Vòng thi kết thúc — 2 Session hoàn thành</div>
-    <div class="leaderboard">
-      <div class="lb-title">Bảng Xếp Hạng Chung Cuộc</div>
-      <div id="final-lb-list"></div>
-    </div>
-    <button class="btn-export" onclick="exportCSV()">📥 Xuất kết quả CSV</button>
-    <button class="btn-reset" onclick="resetGame()">🔄 Tạo game mới</button>
+    <div class="lbbox"><div class="lb-ttl">Bảng Xếp Hạng Chung Cuộc</div><div id="lb-final"></div></div>
+    <button class="btn-gold" onclick="exportCSV()">📥 Xuất kết quả CSV</button>
+    <button class="btn-gray" onclick="resetGame()">🔄 Tạo game mới</button>
   </div>
 
 </div>
 <div class="toast" id="toast"></div>
-
 <script>
-const SUPABASE_URL = 'https://bqvpdddmgkjreqwcomav.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_Iq4aS_moYquCQhU1XpwJew_F9kwtOBm';
-const CSV_COBAN   = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRJ4_gYsguWuoOOf9fqqFDlA_QkwDGnhQKmCIfia44Mx-jykPRnjqKqRMz-A4SBsV9qRvfGy7xgM5Yh/pub?gid=0&single=true&output=csv';
-const CSV_NANGCAO = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRJ4_gYsguWuoOOf9fqqFDlA_QkwDGnhQKmCIfia44Mx-jykPRnjqKqRMz-A4SBsV9qRvfGy7xgM5Yh/pub?gid=730343802&single=true&output=csv';
-const COUNTDOWN_SECS = 3;
+const SB_URL = 'https://bqvpdddmgkjreqwcomav.supabase.co';
+const SB_KEY = 'sb_publishable_Iq4aS_moYquCQhU1XpwJew_F9kwtOBm';
+const TSV_CB = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRJ4_gYsguWuoOOf9fqqFDlA_QkwDGnhQKmCIfia44Mx-jykPRnjqKqRMz-A4SBsV9qRvfGy7xgM5Yh/pub?gid=0&single=true&output=tsv';
+const TSV_NC = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRJ4_gYsguWuoOOf9fqqFDlA_QkwDGnhQKmCIfia44Mx-jykPRnjqKqRMz-A4SBsV9qRvfGy7xgM5Yh/pub?gid=730343802&single=true&output=tsv';
+const CD_SECS = 3;
 
-const { createClient } = supabase;
-const db = createClient(SUPABASE_URL, SUPABASE_KEY);
+const {createClient} = supabase;
+const db = createClient(SB_URL, SB_KEY);
 
-let questions = { coban:[], nangcao:[] };
-let sessionQuestions = [];
-let currentQIndex = 0, currentSession = 1;
-let timerInterval = null, answerPollInterval = null, pollInterval = null, countdownInterval = null;
-let timeLeft = 15, players = [], gamePin = '';
+let qBank = {cb:[], nc:[]};
+let sessQs = [], curIdx = 0, curSess = 1;
+let timerInt = null, pollInt = null, ansInt = null, cdInt = null;
+let tLeft = 15, players = [], pin = '';
 
-// ── PROPER CSV PARSER ──────────────────────────────────────────────────────────
-function parseLine(line) {
-  const result = []; let cur = '', inQuote = false;
-  for (let i = 0; i < line.length; i++) {
-    const ch = line[i];
-    if (ch === '"') {
-      if (inQuote && line[i+1] === '"') { cur += '"'; i++; }
-      else inQuote = !inQuote;
-    } else if (ch === ',' && !inQuote) { result.push(cur); cur = ''; }
-    else cur += ch;
-  }
-  result.push(cur);
-  return result;
-}
-function parseCSV(text) {
-  const lines = text.trim().split('\n');
-  const headers = parseLine(lines[0]).map(h => h.trim().replace(/^"|"$/g,''));
+// ── TSV PARSER — tab separated, handles multiline cells cleanly ──────────────
+function parseTSV(text) {
+  // Normalize line endings
+  const normalized = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+  const lines = normalized.split('\n').filter(l => l.trim());
+  const headers = lines[0].split('\t').map(h => h.trim());
   return lines.slice(1).map(line => {
-    const vals = parseLine(line);
+    const vals = line.split('\t');
     const obj = {};
-    headers.forEach((h,i) => obj[h] = (vals[i]||'').trim().replace(/^"|"$/g,''));
+    headers.forEach((h, i) => {
+      obj[h] = (vals[i] || '').trim();
+    });
     return obj;
   }).filter(q => q.id && q.question);
+}
+
+// ── Clean & normalize answer value ──────────────────────────────────────────
+function cleanAnswer(v) {
+  return (v || '').trim().toUpperCase().replace(/[^A-D]/g, '');
 }
 
 function shuffle(arr) {
@@ -234,76 +215,80 @@ function shuffle(arr) {
   return a;
 }
 
-function generatePin() { return Math.floor(1000+Math.random()*9000).toString(); }
+function genPin() { return Math.floor(1000 + Math.random()*9000).toString(); }
 
-async function loadQuestions() {
+async function loadQs() {
   showToast('⏳ Đang tải câu hỏi...');
   try {
-    const [r1,r2] = await Promise.all([
-      fetch(CSV_COBAN).then(r=>r.text()),
-      fetch(CSV_NANGCAO).then(r=>r.text())
+    const [r1, r2] = await Promise.all([
+      fetch(TSV_CB).then(r => r.text()),
+      fetch(TSV_NC).then(r => r.text())
     ]);
-    questions.coban   = parseCSV(r1);
-    questions.nangcao = parseCSV(r2);
-    showToast(`✅ ${questions.coban.length} câu cơ bản · ${questions.nangcao.length} câu nâng cao`);
-  } catch(e) { showToast('❌ Lỗi tải câu hỏi: '+e.message); }
+    qBank.cb = parseTSV(r1);
+    qBank.nc = parseTSV(r2);
+    // Normalize answer field for all questions
+    qBank.cb.forEach(q => q.answer = cleanAnswer(q.answer));
+    qBank.nc.forEach(q => q.answer = cleanAnswer(q.answer));
+    showToast(`✅ ${qBank.cb.length} câu cơ bản · ${qBank.nc.length} câu nâng cao`);
+  } catch(e) { showToast('❌ Lỗi tải câu hỏi: ' + e.message); }
 }
 
-function buildSessionQuestions() {
-  const coban   = shuffle(questions.coban).slice(0,8).map(q=>({...q,_type:'basic'}));
-  const nangcao = shuffle(questions.nangcao).slice(0,2).map(q=>({...q,_type:'advanced'}));
-  return shuffle([...coban,...nangcao]);
+function buildSessQs() {
+  const cb = shuffle(qBank.cb).slice(0,8).map(q => ({...q, _type:'basic'}));
+  const nc = shuffle(qBank.nc).slice(0,2).map(q => ({...q, _type:'advanced'}));
+  return shuffle([...cb, ...nc]);
 }
 
 async function init() {
-  gamePin = generatePin();
-  document.getElementById('pin-display').textContent = gamePin;
+  pin = genPin();
+  document.getElementById('pin-num').textContent = pin;
   const base = window.location.href.replace('host.html','player.html');
-  document.getElementById('player-url').textContent = base+'?pin='+gamePin;
-  await loadQuestions();
+  document.getElementById('pin-url').textContent = base + '?pin=' + pin;
+
+  await loadQs();
+
+  // Reset all game data
   await db.from('players').delete().neq('id','__none__');
-  await db.from('answers').delete().neq('id',0);
+  await db.from('answers').delete().neq('id', 0);
   await db.from('game_state').upsert({
     id:'current', status:'lobby', session:1,
-    question_index:0, pin:gamePin, session_questions:null,
-    countdown_started_at:null, question_started_at:null
+    question_index:0, pin:pin,
+    session_questions:null,
+    countdown_started_at:null,
+    question_started_at:null
   });
   startLobbyPoll();
 }
 
 function startLobbyPoll() {
-  clearInterval(pollInterval);
-  pollInterval = setInterval(async () => {
+  clearInterval(pollInt);
+  pollInt = setInterval(async () => {
     const {data} = await db.from('players').select('*').order('joined_at');
-    if (data) { players=data; renderPlayers(data); }
+    if (data) { players = data; renderPlayers(data); }
   }, 2000);
 }
 
 function renderPlayers(list) {
-  document.getElementById('players-grid').innerHTML =
-    list.map(p=>`<div class="player-chip">👤 ${p.name}</div>`).join('');
-  document.getElementById('player-count').textContent = `${list.length} người chơi`;
+  document.getElementById('pgrid').innerHTML =
+    list.map(p => `<div class="chip">👤 ${p.name}</div>`).join('');
+  document.getElementById('pcnt').textContent = `${list.length} người chơi`;
   document.getElementById('btn-start').disabled = list.length === 0;
 }
 
-async function startSession(session) {
-  currentSession = session; currentQIndex = 0;
-  sessionQuestions = buildSessionQuestions();
-  clearInterval(pollInterval);
-  document.getElementById('session-badge').textContent = `SESSION ${session}`;
+async function startSession(sess) {
+  curSess = sess; curIdx = 0;
+  sessQs = buildSessQs();
+  clearInterval(pollInt);
+  document.getElementById('badge').textContent = `SESSION ${sess}`;
   await pushCountdown(0);
 }
 
-// ── PUSH COUNTDOWN: save questions + set status=countdown ──────────────────────
 async function pushCountdown(idx) {
   const now = new Date().toISOString();
-  // Save full question list + countdown start time
   await db.from('game_state').upsert({
-    id:'current',
-    status:'countdown',
-    session: currentSession,
-    question_index: idx,
-    session_questions: sessionQuestions,   // full list for players to read
+    id:'current', status:'countdown',
+    session: curSess, question_index: idx,
+    session_questions: sessQs,
     countdown_started_at: now,
     question_started_at: null
   });
@@ -311,180 +296,176 @@ async function pushCountdown(idx) {
 }
 
 function showCountdown(idx) {
-  const q = sessionQuestions[idx];
+  const q = sessQs[idx];
   const adv = q._type === 'advanced';
-  document.getElementById('countdown-q-info').textContent =
+  document.getElementById('cd-info').textContent =
     `Câu ${idx+1}/10 · ${adv ? '⭐ Nâng cao' : 'Cơ bản'}`;
-  showScreen('countdown-screen');
+  showScreen('s-cd');
 
-  let count = COUNTDOWN_SECS;
-  document.getElementById('countdown-num').textContent = count;
-  clearInterval(countdownInterval);
-  countdownInterval = setInterval(async () => {
-    count--;
-    const el = document.getElementById('countdown-num');
-    el.textContent = count;
-    el.style.animation = 'none';
-    void el.offsetWidth; // reflow
-    el.style.animation = 'countPulse .8s ease';
-
-    if (count <= 0) {
-      clearInterval(countdownInterval);
-      // Set question_started_at so players know when to start their timer
-      const questionStart = new Date().toISOString();
+  let c = CD_SECS;
+  document.getElementById('cd-num').textContent = c;
+  clearInterval(cdInt);
+  cdInt = setInterval(async () => {
+    c--;
+    document.getElementById('cd-num').textContent = c > 0 ? c : '▶';
+    if (c <= 0) {
+      clearInterval(cdInt);
+      const qStart = new Date().toISOString();
       await db.from('game_state').upsert({
         id:'current', status:'question',
-        question_started_at: questionStart
+        question_started_at: qStart
       });
-      showQuestion(idx);
+      showQ(idx);
     }
   }, 1000);
 }
 
-function showQuestion(idx) {
-  currentQIndex = idx;
-  const q = sessionQuestions[idx];
+function showQ(idx) {
+  curIdx = idx;
+  const q = sessQs[idx];
   const adv = q._type === 'advanced';
-  document.getElementById('q-counter').textContent = `CÂU ${idx+1} / 10`;
-  document.getElementById('q-type-badge').textContent = adv ? '⭐ NÂNG CAO' : 'CƠ BẢN';
-  document.getElementById('q-type-badge').className   = `q-type-badge ${adv?'q-type-advanced':'q-type-basic'}`;
-  document.getElementById('question-text').textContent = q.question;
-  document.getElementById('ans-A').textContent = q.A;
-  document.getElementById('ans-B').textContent = q.B;
-  document.getElementById('ans-C').textContent = q.C;
-  document.getElementById('ans-D').textContent = q.D;
-  document.getElementById('total-count').textContent     = players.length;
-  document.getElementById('answered-count').textContent  = '0';
-  document.getElementById('remaining-count').textContent = players.length;
-  showScreen('question-screen');
+  document.getElementById('qcnt').textContent = `CÂU ${idx+1} / 10`;
+  document.getElementById('qtag').textContent = adv ? '⭐ NÂNG CAO' : 'CƠ BẢN';
+  document.getElementById('qtag').className = `qtag ${adv ? 'adv' : 'basic'}`;
+  document.getElementById('qtxt').textContent = q.question;
+  document.getElementById('a-A').textContent = q.A;
+  document.getElementById('a-B').textContent = q.B;
+  document.getElementById('a-C').textContent = q.C;
+  document.getElementById('a-D').textContent = q.D;
+  document.getElementById('s-total').textContent = players.length;
+  document.getElementById('s-ans').textContent = '0';
+  document.getElementById('s-rem').textContent = players.length;
+  showScreen('s-q');
   startTimer();
-  pollAnswers();
+  pollAns();
 }
 
-function pollAnswers() {
-  clearInterval(answerPollInterval);
-  answerPollInterval = setInterval(async () => {
+function pollAns() {
+  clearInterval(ansInt);
+  ansInt = setInterval(async () => {
     const {data} = await db.from('answers')
-      .select('*').eq('session',currentSession).eq('question_index',currentQIndex);
+      .select('*').eq('session', curSess).eq('question_index', curIdx);
     if (!data) return;
-    document.getElementById('answered-count').textContent  = data.length;
-    document.getElementById('remaining-count').textContent = Math.max(0,players.length-data.length);
+    document.getElementById('s-ans').textContent = data.length;
+    document.getElementById('s-rem').textContent = Math.max(0, players.length - data.length);
     if (data.length >= players.length && players.length > 0) {
-      clearInterval(answerPollInterval); endQuestion();
+      clearInterval(ansInt); endQ();
     }
   }, 1000);
 }
 
 function startTimer() {
-  timeLeft = 15; clearInterval(timerInterval);
-  const bar = document.getElementById('timer-bar');
-  const num = document.getElementById('timer-number');
-  bar.style.width='100%'; bar.className='timer-bar'; num.className='timer-number';
-  timerInterval = setInterval(() => {
-    timeLeft--;
-    bar.style.width=(timeLeft/15*100)+'%';
-    num.textContent=timeLeft;
-    if (timeLeft<=5) { bar.className='timer-bar warning'; num.className='timer-number warning'; }
-    if (timeLeft<=0) { clearInterval(timerInterval); clearInterval(answerPollInterval); endQuestion(); }
+  tLeft = 15; clearInterval(timerInt);
+  const bar = document.getElementById('tbar');
+  const num = document.getElementById('tnum');
+  bar.style.width = '100%'; bar.className = 'tbar'; num.className = 'tnum';
+  timerInt = setInterval(() => {
+    tLeft--;
+    bar.style.width = (tLeft/15*100) + '%';
+    num.textContent = tLeft;
+    if (tLeft <= 5) { bar.className = 'tbar warn'; num.className = 'tnum warn'; }
+    if (tLeft <= 0) { clearInterval(timerInt); clearInterval(ansInt); endQ(); }
   }, 1000);
 }
 
-async function endQuestion() {
-  clearInterval(timerInterval); clearInterval(answerPollInterval);
+async function endQ() {
+  clearInterval(timerInt); clearInterval(ansInt);
   await db.from('game_state').upsert({id:'current', status:'result'});
-  const {data:answers} = await db.from('answers')
-    .select('*').eq('session',currentSession).eq('question_index',currentQIndex);
-  const {data:lb} = await db.from('players').select('*').order('score',{ascending:false});
-  showScreen('result-screen');
-  renderDistribution(answers||[]);
-  await renderLeaderboard(lb||[], 'lb-list');
-  const isLastQ=currentQIndex>=9, isLastS=currentSession>=2;
-  const btn=document.getElementById('btn-next');
-  if (isLastQ&&isLastS)  btn.textContent='🏆 Xem kết quả cuối cùng';
-  else if (isLastQ)      btn.textContent='🚀 Bắt đầu Session 2';
-  else                   btn.textContent=`Câu tiếp theo ▶ (${currentQIndex+2}/10)`;
+  const {data:ans} = await db.from('answers')
+    .select('*').eq('session', curSess).eq('question_index', curIdx);
+  const {data:lb} = await db.from('players').select('*').order('score', {ascending:false});
+  showScreen('s-result');
+  renderDist(ans || []);
+  await renderLB(lb || [], 'lb-mid');
+  const lastQ = curIdx >= 9, lastS = curSess >= 2;
+  const btn = document.getElementById('btn-next');
+  if (lastQ && lastS)  btn.textContent = '🏆 Xem kết quả cuối cùng';
+  else if (lastQ)      btn.textContent = '🚀 Bắt đầu Session 2';
+  else                 btn.textContent = `Câu tiếp theo ▶ (${curIdx+2}/10)`;
 }
 
-function renderDistribution(answers) {
-  const counts={A:0,B:0,C:0,D:0};
-  answers.forEach(a=>{ if(a.answer in counts) counts[a.answer]++; });
-  const max=Math.max(...Object.values(counts),1);
-  ['A','B','C','D'].forEach(k=>{
-    document.getElementById(`bar-${k}`).style.height=(counts[k]/max*100)+'%';
-    document.getElementById(`cnt-${k}`).textContent=counts[k];
+function renderDist(ans) {
+  const c = {A:0,B:0,C:0,D:0};
+  ans.forEach(a => { if (a.answer in c) c[a.answer]++; });
+  const max = Math.max(...Object.values(c), 1);
+  ['A','B','C','D'].forEach(k => {
+    document.getElementById(`bar-${k}`).style.height = (c[k]/max*100) + '%';
+    document.getElementById(`cnt-${k}`).textContent = c[k];
   });
 }
 
-async function renderLeaderboard(list, containerId) {
-  const ranks=['🥇','🥈','🥉'], rankClass=['gold','silver','bronze'];
-  const {data:allAnswers} = await db.from('answers').select('player_id,answered_at');
-  const timeMap={};
-  (allAnswers||[]).forEach(a=>{ timeMap[a.player_id]=(timeMap[a.player_id]||0)+(a.answered_at||0); });
-  document.getElementById(containerId).innerHTML = list.slice(0,20).map((p,i)=>`
-    <div class="lb-row">
-      <div class="lb-rank ${rankClass[i]||''}">${ranks[i]||i+1}</div>
-      <div class="lb-name">${p.name}</div>
-      <div class="lb-score">${p.score.toFixed(2)}</div>
-      <div class="lb-time">⏱ ${timeMap[p.id]?(timeMap[p.id].toFixed(1)+'s'):'—'}</div>
+async function renderLB(list, id) {
+  const ranks = ['🥇','🥈','🥉'], rc = ['gold','silver','bronze'];
+  const {data:allAns} = await db.from('answers').select('player_id,answered_at');
+  const tmap = {};
+  (allAns||[]).forEach(a => { tmap[a.player_id] = (tmap[a.player_id]||0) + (a.answered_at||0); });
+  document.getElementById(id).innerHTML = list.slice(0,20).map((p,i) => `
+    <div class="lbrow">
+      <div class="lbrank ${rc[i]||''}">${ranks[i]||i+1}</div>
+      <div class="lbname">${p.name}</div>
+      <div class="lbscore">${p.score.toFixed(2)}</div>
+      <div class="lbtime">⏱ ${tmap[p.id] ? tmap[p.id].toFixed(1)+'s' : '—'}</div>
     </div>`).join('');
 }
 
-async function nextQuestion() {
-  const isLastQ=currentQIndex>=9, isLastS=currentSession>=2;
-  if (isLastQ&&isLastS) { showFinal(); return; }
-  if (isLastQ) {
-    showScreen('lobby');
-    document.getElementById('session-badge').textContent='NGHỈ GIẢI LAO';
-    const btn=document.getElementById('btn-start');
-    btn.textContent='🚀 Bắt đầu Session 2';
-    btn.onclick=()=>startSession(2); btn.disabled=false;
-    renderPlayers(players); return;
+async function nextQ() {
+  const lastQ = curIdx >= 9, lastS = curSess >= 2;
+  if (lastQ && lastS) { showFinal(); return; }
+  if (lastQ) {
+    showScreen('s-lobby');
+    document.getElementById('badge').textContent = 'NGHỈ GIẢI LAO';
+    const btn = document.getElementById('btn-start');
+    btn.textContent = '🚀 Bắt đầu Session 2';
+    btn.onclick = () => startSession(2);
+    btn.disabled = false;
+    renderPlayers(players);
+    return;
   }
-  // Next question → push countdown
-  await pushCountdown(currentQIndex+1);
+  await pushCountdown(curIdx + 1);
 }
 
 async function showFinal() {
-  await db.from('game_state').upsert({id:'current',status:'final'});
-  const {data:lb} = await db.from('players').select('*').order('score',{ascending:false});
-  showScreen('final-screen');
-  await renderLeaderboard(lb||[], 'final-lb-list');
+  await db.from('game_state').upsert({id:'current', status:'final'});
+  const {data:lb} = await db.from('players').select('*').order('score', {ascending:false});
+  showScreen('s-final');
+  await renderLB(lb || [], 'lb-final');
 }
 
 async function exportCSV() {
-  const {data:pList} = await db.from('players').select('*').order('score',{ascending:false});
-  const {data:answers} = await db.from('answers').select('*');
-  const timeMap={};
-  (answers||[]).forEach(a=>{ timeMap[a.player_id]=(timeMap[a.player_id]||0)+(a.answered_at||0); });
-  const rows=[['Thứ hạng','Họ và Tên','Tổng điểm','Tổng thời gian (giây)']];
-  (pList||[]).forEach((p,i)=>{
-    rows.push([i+1, p.name, p.score.toFixed(2), (timeMap[p.id]||0).toFixed(1)]);
+  const {data:pList} = await db.from('players').select('*').order('score', {ascending:false});
+  const {data:ans} = await db.from('answers').select('*');
+  const tmap = {};
+  (ans||[]).forEach(a => { tmap[a.player_id] = (tmap[a.player_id]||0) + (a.answered_at||0); });
+  const rows = [['Thứ hạng','Họ và Tên','Tổng điểm','Tổng thời gian (giây)']];
+  (pList||[]).forEach((p,i) => {
+    rows.push([i+1, p.name, p.score.toFixed(2), (tmap[p.id]||0).toFixed(1)]);
   });
-  const csv=rows.map(r=>r.map(v=>`"${v}"`).join(',')).join('\n');
-  const blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'});
-  const a=document.createElement('a');
-  a.href=URL.createObjectURL(blob);
-  a.download=`SHB_Quiz_KetQua_${new Date().toLocaleDateString('vi-VN').replace(/\//g,'-')}.csv`;
-  a.click(); showToast('✅ Xuất file thành công!');
+  const csv = rows.map(r => r.map(v => `"${v}"`).join(',')).join('\n');
+  const blob = new Blob(['\uFEFF'+csv], {type:'text/csv;charset=utf-8;'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `SHB_Quiz_${new Date().toLocaleDateString('vi-VN').replace(/\//g,'-')}.csv`;
+  a.click();
+  showToast('✅ Xuất file thành công!');
 }
 
 async function resetGame() {
   await db.from('players').delete().neq('id','__none__');
-  await db.from('answers').delete().neq('id',0);
+  await db.from('answers').delete().neq('id', 0);
   window.location.reload();
 }
 
 function showScreen(id) {
-  ['lobby','countdown-screen','question-screen','result-screen','final-screen'].forEach(s=>{
-    document.getElementById(s).style.display='none';
+  ['s-lobby','s-cd','s-q','s-result','s-final'].forEach(s => {
+    document.getElementById(s).style.display = 'none';
   });
-  document.getElementById(id).style.display=(id==='lobby')?'flex':'block';
+  document.getElementById(id).style.display = (id === 's-lobby') ? 'flex' : 'block';
 }
 
 function showToast(msg) {
-  const t=document.getElementById('toast');
-  t.textContent=msg; t.classList.add('show');
-  setTimeout(()=>t.classList.remove('show'),3000);
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
 }
 
 init();
