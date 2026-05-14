@@ -7,344 +7,353 @@
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-  :root { --red:#C8102E; --red-dark:#9b0d22; --gold:#F5A623; --white:#FFFFFF; --bg:#0a0a0f; --surface:#13131a; --surface2:#1e1e2a; --border:rgba(255,255,255,0.08); --text:#f0f0f0; --text-muted:#888; }
-  * { margin:0; padding:0; box-sizing:border-box; }
-  body { font-family:'Be Vietnam Pro',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; display:flex; flex-direction:column; }
-  body::before { content:''; position:fixed; inset:0; background:radial-gradient(ellipse at 30% 70%,rgba(200,16,46,.1) 0%,transparent 60%); pointer-events:none; z-index:0; }
-  .wrap { position:relative; z-index:1; flex:1; display:flex; flex-direction:column; padding:20px; max-width:500px; margin:0 auto; width:100%; }
+  :root{--red:#C8102E;--red-dark:#9b0d22;--gold:#F5A623;--white:#FFF;--bg:#0a0a0f;--surface:#13131a;--surface2:#1e1e2a;--border:rgba(255,255,255,.08);--text:#f0f0f0;--muted:#888}
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'Be Vietnam Pro',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column}
+  body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at 30% 70%,rgba(200,16,46,.1) 0%,transparent 60%);pointer-events:none;z-index:0}
+  .wrap{position:relative;z-index:1;flex:1;display:flex;flex-direction:column;padding:20px;max-width:500px;margin:0 auto;width:100%}
 
-  /* JOIN */
-  #join-screen { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:24px; }
-  .logo-icon { width:72px; height:72px; background:var(--red); border-radius:16px; display:flex; align-items:center; justify-content:center; font-family:'Bebas Neue'; font-size:36px; color:#fff; margin:0 auto 12px; }
-  .logo-title { font-family:'Bebas Neue'; font-size:32px; letter-spacing:3px; text-align:center; }
-  .join-form { width:100%; display:flex; flex-direction:column; gap:12px; }
-  .input-label { font-size:12px; letter-spacing:2px; color:var(--text-muted); text-transform:uppercase; margin-bottom:6px; display:block; }
-  .input-field { background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:14px 16px; color:var(--white); font-size:16px; font-family:'Be Vietnam Pro'; outline:none; transition:border-color .2s; width:100%; }
-  .input-field:focus { border-color:var(--red); }
-  .btn-join { background:var(--red); color:#fff; border:none; border-radius:10px; padding:16px; font-size:17px; font-weight:800; cursor:pointer; font-family:'Be Vietnam Pro'; margin-top:8px; transition:all .2s; width:100%; }
-  .btn-join:hover { background:var(--red-dark); }
+  #s-join{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px}
+  .logo-icon{width:72px;height:72px;background:var(--red);border-radius:16px;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue';font-size:36px;color:#fff;margin:0 auto 12px}
+  .logo-title{font-family:'Bebas Neue';font-size:32px;letter-spacing:3px;text-align:center}
+  .form{width:100%;display:flex;flex-direction:column;gap:12px}
+  .ilbl{font-size:11px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:6px;display:block}
+  .ifield{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 16px;color:var(--white);font-size:16px;font-family:'Be Vietnam Pro';outline:none;transition:border-color .2s;width:100%}
+  .ifield:focus{border-color:var(--red)}
+  .btn-join{background:var(--red);color:#fff;border:none;border-radius:10px;padding:16px;font-size:17px;font-weight:800;cursor:pointer;font-family:'Be Vietnam Pro';margin-top:8px;transition:all .2s;width:100%}
+  .btn-join:hover{background:var(--red-dark)}
+  .btn-join:disabled{opacity:.5;cursor:not-allowed}
 
-  /* LOBBY */
-  #lobby-screen { display:none; flex:1; flex-direction:column; align-items:center; justify-content:center; gap:24px; text-align:center; }
-  .lobby-name { font-family:'Bebas Neue'; font-size:36px; color:var(--gold); }
-  .lobby-wait { color:var(--text-muted); font-size:15px; }
-  .pulse { animation:pulse 2s infinite; }
-  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+  #s-lobby{display:none;flex:1;flex-direction:column;align-items:center;justify-content:center;gap:24px;text-align:center}
+  .lname{font-family:'Bebas Neue';font-size:36px;color:var(--gold)}
+  .lwait{color:var(--muted);font-size:15px}
+  .pulse{animation:pulse 2s infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
 
-  /* COUNTDOWN */
-  #countdown-screen { display:none; flex:1; flex-direction:column; align-items:center; justify-content:center; gap:16px; text-align:center; }
-  .cdlabel { font-size:14px; color:var(--text-muted); letter-spacing:3px; text-transform:uppercase; }
-  .cdnum { font-family:'Bebas Neue'; font-size:160px; color:var(--gold); line-height:1; animation:cdPop .8s ease; }
-  @keyframes cdPop { from{transform:scale(1.4);opacity:.4} to{transform:scale(1);opacity:1} }
-  .cdqinfo { font-size:14px; color:var(--text-muted); }
+  #s-cd{display:none;flex:1;flex-direction:column;align-items:center;justify-content:center;gap:16px;text-align:center}
+  .cdlbl{font-size:13px;color:var(--muted);letter-spacing:3px;text-transform:uppercase}
+  .cdnum{font-family:'Bebas Neue';font-size:160px;color:var(--gold);line-height:1}
+  .cdinfo{font-size:13px;color:var(--muted)}
 
-  /* QUESTION */
-  #question-screen { display:none; flex:1; flex-direction:column; gap:16px; }
-  .timer-arc { text-align:center; padding:8px 0; }
-  .timer-big { font-family:'Bebas Neue'; font-size:64px; color:var(--white); line-height:1; }
-  .timer-big.warning { color:var(--gold); }
-  .timer-bar-wrap { height:6px; background:var(--surface2); border-radius:3px; overflow:hidden; }
-  .timer-bar { height:100%; background:var(--red); border-radius:3px; transition:width .2s linear,background .5s; }
-  .timer-bar.warning { background:var(--gold); }
-  .q-info { display:flex; justify-content:space-between; align-items:center; }
-  .q-num { font-size:13px; color:var(--text-muted); }
-  .q-type { font-size:12px; font-weight:700; padding:3px 10px; border-radius:12px; }
-  .q-type.basic { color:var(--red); background:rgba(200,16,46,.15); }
-  .q-type.advanced { color:var(--gold); background:rgba(245,166,35,.15); }
-  .q-text { background:var(--surface); border-radius:14px; padding:20px; font-size:15px; font-weight:600; line-height:1.6; text-align:center; border:1px solid var(--border); min-height:80px; display:flex; align-items:center; justify-content:center; }
-  .ans-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
-  .ans-btn { border-radius:14px; padding:18px 12px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; border:2px solid transparent; cursor:pointer; transition:all .15s; min-height:80px; font-family:'Be Vietnam Pro'; }
-  .ans-btn:active { transform:scale(.96); }
-  .ans-btn.A { background:rgba(239,68,68,.15); border-color:rgba(239,68,68,.4); }
-  .ans-btn.B { background:rgba(59,130,246,.15); border-color:rgba(59,130,246,.4); }
-  .ans-btn.C { background:rgba(234,179,8,.15); border-color:rgba(234,179,8,.4); }
-  .ans-btn.D { background:rgba(34,197,94,.15); border-color:rgba(34,197,94,.4); }
-  .ans-btn:disabled { opacity:.5; cursor:not-allowed; transform:none; }
-  .ans-btn.selected.A { background:rgba(239,68,68,.4); border-color:rgb(239,68,68); }
-  .ans-btn.selected.B { background:rgba(59,130,246,.4); border-color:rgb(59,130,246); }
-  .ans-btn.selected.C { background:rgba(234,179,8,.4); border-color:rgb(234,179,8); }
-  .ans-btn.selected.D { background:rgba(34,197,94,.4); border-color:rgb(34,197,94); }
-  .ans-label { width:28px; height:28px; border-radius:6px; display:flex; align-items:center; justify-content:center; font-family:'Bebas Neue'; font-size:16px; }
-  .ans-btn.A .ans-label{background:rgb(239,68,68)} .ans-btn.B .ans-label{background:rgb(59,130,246)}
-  .ans-btn.C .ans-label{background:rgb(234,179,8);color:#000} .ans-btn.D .ans-label{background:rgb(34,197,94);color:#000}
-  .ans-text { font-size:12px; font-weight:600; text-align:center; line-height:1.3; color:var(--text); }
+  #s-q{display:none;flex:1;flex-direction:column;gap:14px}
+  .qinfo{display:flex;justify-content:space-between;align-items:center}
+  .qnum{font-size:13px;color:var(--muted)}
+  .qtag{font-size:12px;font-weight:700;padding:3px 10px;border-radius:12px}
+  .qtag.basic{color:var(--red);background:rgba(200,16,46,.15)}
+  .qtag.adv{color:var(--gold);background:rgba(245,166,35,.15)}
+  .tbar-w{height:6px;background:var(--surface2);border-radius:3px;overflow:hidden}
+  .tbar{height:100%;background:var(--red);border-radius:3px;transition:width .2s linear,background .5s}
+  .tbar.warn{background:var(--gold)}
+  .tnum-w{text-align:center;padding:8px 0}
+  .tnum{font-family:'Bebas Neue';font-size:64px;color:var(--white);line-height:1}
+  .tnum.warn{color:var(--gold)}
+  .qtxt{background:var(--surface);border-radius:14px;padding:20px;font-size:15px;font-weight:600;line-height:1.6;text-align:center;border:1px solid var(--border);min-height:80px;display:flex;align-items:center;justify-content:center}
+  .agrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .abtn{border-radius:14px;padding:18px 12px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;border:2px solid transparent;cursor:pointer;transition:all .15s;min-height:80px;font-family:'Be Vietnam Pro'}
+  .abtn:active{transform:scale(.96)}
+  .abtn.A{background:rgba(239,68,68,.15);border-color:rgba(239,68,68,.4)}
+  .abtn.B{background:rgba(59,130,246,.15);border-color:rgba(59,130,246,.4)}
+  .abtn.C{background:rgba(234,179,8,.15);border-color:rgba(234,179,8,.4)}
+  .abtn.D{background:rgba(34,197,94,.15);border-color:rgba(34,197,94,.4)}
+  .abtn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+  .abtn.sel.A{background:rgba(239,68,68,.4);border-color:rgb(239,68,68)}
+  .abtn.sel.B{background:rgba(59,130,246,.4);border-color:rgb(59,130,246)}
+  .abtn.sel.C{background:rgba(234,179,8,.4);border-color:rgb(234,179,8)}
+  .abtn.sel.D{background:rgba(34,197,94,.4);border-color:rgb(34,197,94)}
+  .albl{width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue';font-size:16px}
+  .abtn.A .albl{background:rgb(239,68,68)}.abtn.B .albl{background:rgb(59,130,246)}
+  .abtn.C .albl{background:rgb(234,179,8);color:#000}.abtn.D .albl{background:rgb(34,197,94);color:#000}
+  .atxt{font-size:12px;font-weight:600;text-align:center;line-height:1.3;color:var(--text)}
 
-  /* WAIT */
-  #wait-screen { display:none; flex:1; flex-direction:column; align-items:center; justify-content:center; gap:20px; text-align:center; }
-  .wait-check { font-size:72px; animation:popIn .4s ease; }
-  @keyframes popIn { from{transform:scale(0)} to{transform:scale(1)} }
-  .wait-hint { font-size:13px; color:var(--text-muted); }
+  #s-wait{display:none;flex:1;flex-direction:column;align-items:center;justify-content:center;gap:20px;text-align:center}
+  .wcheck{font-size:72px;animation:popIn .4s ease}
+  @keyframes popIn{from{transform:scale(0)}to{transform:scale(1)}}
+  .whint{font-size:13px;color:var(--muted)}
 
-  /* FINAL */
-  #final-screen { display:none; flex:1; flex-direction:column; align-items:center; justify-content:center; gap:20px; text-align:center; }
-  .final-medal { font-size:80px; }
-  .final-title { font-family:'Bebas Neue'; font-size:48px; color:var(--gold); }
-  .final-score { font-size:16px; color:var(--text-muted); }
-  .final-score span { color:var(--white); font-weight:700; font-size:28px; display:block; margin-top:4px; }
-  .final-rank-txt { font-size:15px; color:var(--text-muted); }
+  #s-final{display:none;flex:1;flex-direction:column;align-items:center;justify-content:center;gap:20px;text-align:center}
+  .fmed{font-size:80px}
+  .fttl{font-family:'Bebas Neue';font-size:48px;color:var(--gold)}
+  .fscore{font-size:16px;color:var(--muted)}
+  .fscore span{color:var(--white);font-weight:700;font-size:28px;display:block;margin-top:4px}
+  .frank{font-size:15px;color:var(--muted)}
 
-  .toast { position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:var(--surface2); border:1px solid var(--border); padding:10px 20px; border-radius:10px; font-size:13px; opacity:0; transition:opacity .3s; z-index:999; }
-  .toast.show { opacity:1; }
+  .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--surface2);border:1px solid var(--border);padding:10px 20px;border-radius:10px;font-size:13px;opacity:0;transition:opacity .3s;z-index:999}
+  .toast.show{opacity:1}
 </style>
 </head>
 <body>
 <div class="wrap">
 
-  <div id="join-screen">
+  <div id="s-join">
     <div>
       <div class="logo-icon">SHB</div>
       <div class="logo-title">Quiz Challenge</div>
     </div>
-    <div class="join-form">
-      <div><label class="input-label">Họ và Tên</label>
-        <input type="text" class="input-field" id="name-input" placeholder="Nhập tên của bạn..." maxlength="30"></div>
-      <div><label class="input-label">Mã Phòng (PIN)</label>
-        <input type="text" class="input-field" id="pin-input" placeholder="Nhập mã 4 chữ số..." maxlength="4" inputmode="numeric"></div>
-      <button class="btn-join" onclick="joinGame()">Tham gia →</button>
+    <div class="form">
+      <div><label class="ilbl">Họ và Tên</label>
+        <input type="text" class="ifield" id="inp-name" placeholder="Nhập tên của bạn..." maxlength="30"></div>
+      <div><label class="ilbl">Mã Phòng (PIN)</label>
+        <input type="text" class="ifield" id="inp-pin" placeholder="Nhập mã 4 chữ số..." maxlength="4" inputmode="numeric"></div>
+      <button class="btn-join" id="btn-join" onclick="joinGame()">Tham gia →</button>
     </div>
   </div>
 
-  <div id="lobby-screen">
+  <div id="s-lobby">
     <div style="font-size:64px">⏳</div>
-    <div class="lobby-name" id="lobby-name">Xin chào!</div>
-    <div class="lobby-wait pulse">Đang chờ host bắt đầu...</div>
+    <div class="lname" id="lname">Xin chào!</div>
+    <div class="lwait pulse">Đang chờ host bắt đầu...</div>
   </div>
 
-  <div id="countdown-screen">
-    <div class="cdlabel">Chuẩn bị!</div>
+  <div id="s-cd">
+    <div class="cdlbl">Chuẩn bị!</div>
     <div class="cdnum" id="p-cdnum">3</div>
-    <div class="cdqinfo" id="p-cdqinfo"></div>
+    <div class="cdinfo" id="p-cdinfo"></div>
   </div>
 
-  <div id="question-screen">
-    <div class="q-info">
-      <div class="q-num" id="p-q-counter">Câu 1/10</div>
-      <div class="q-type basic" id="p-q-type">CƠ BẢN</div>
+  <div id="s-q">
+    <div class="qinfo">
+      <div class="qnum" id="p-qnum">Câu 1/10</div>
+      <div class="qtag basic" id="p-qtag">CƠ BẢN</div>
     </div>
-    <div class="timer-bar-wrap"><div class="timer-bar" id="p-timer-bar" style="width:100%"></div></div>
-    <div class="timer-arc"><div class="timer-big" id="p-timer">15</div></div>
-    <div class="q-text" id="p-q-text">Đang tải...</div>
-    <div class="ans-grid">
-      <button class="ans-btn A" onclick="submitAnswer('A')"><div class="ans-label">A</div><div class="ans-text" id="p-ans-A"></div></button>
-      <button class="ans-btn B" onclick="submitAnswer('B')"><div class="ans-label">B</div><div class="ans-text" id="p-ans-B"></div></button>
-      <button class="ans-btn C" onclick="submitAnswer('C')"><div class="ans-label">C</div><div class="ans-text" id="p-ans-C"></div></button>
-      <button class="ans-btn D" onclick="submitAnswer('D')"><div class="ans-label">D</div><div class="ans-text" id="p-ans-D"></div></button>
+    <div class="tbar-w"><div class="tbar" id="p-tbar" style="width:100%"></div></div>
+    <div class="tnum-w"><div class="tnum" id="p-tnum">15</div></div>
+    <div class="qtxt" id="p-qtxt">Đang tải...</div>
+    <div class="agrid">
+      <button class="abtn A" onclick="submit('A')"><div class="albl">A</div><div class="atxt" id="p-A"></div></button>
+      <button class="abtn B" onclick="submit('B')"><div class="albl">B</div><div class="atxt" id="p-B"></div></button>
+      <button class="abtn C" onclick="submit('C')"><div class="albl">C</div><div class="atxt" id="p-C"></div></button>
+      <button class="abtn D" onclick="submit('D')"><div class="albl">D</div><div class="atxt" id="p-D"></div></button>
     </div>
   </div>
 
-  <div id="wait-screen">
-    <div class="wait-check">✅</div>
-    <div class="wait-hint pulse">Chờ host chuyển câu tiếp theo...</div>
+  <div id="s-wait">
+    <div class="wcheck">✅</div>
+    <div class="whint pulse">Chờ host chuyển câu tiếp theo...</div>
   </div>
 
-  <div id="final-screen">
-    <div class="final-medal" id="final-medal">🎉</div>
-    <div class="final-title">KẾT THÚC!</div>
-    <div class="final-score">Tổng điểm của bạn:<span id="final-score-val">0</span></div>
-    <div class="final-rank-txt" id="final-rank"></div>
+  <div id="s-final">
+    <div class="fmed" id="f-med">🎉</div>
+    <div class="fttl">KẾT THÚC!</div>
+    <div class="fscore">Tổng điểm của bạn:<span id="f-score">0</span></div>
+    <div class="frank" id="f-rank"></div>
   </div>
 
 </div>
 <div class="toast" id="toast"></div>
-
 <script>
-const SUPABASE_URL = 'https://bqvpdddmgkjreqwcomav.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_Iq4aS_moYquCQhU1XpwJew_F9kwtOBm';
-const { createClient } = supabase;
-const db = createClient(SUPABASE_URL, SUPABASE_KEY);
+const SB_URL = 'https://bqvpdddmgkjreqwcomav.supabase.co';
+const SB_KEY = 'sb_publishable_Iq4aS_moYquCQhU1XpwJew_F9kwtOBm';
+const {createClient} = supabase;
+const db = createClient(SB_URL, SB_KEY);
 
-let playerId='', playerName='';
-let sessionQuestions=[];
-let timerInterval=null, stateInterval=null, countdownInterval=null;
-let questionStartTime=null, hasAnswered=false, myScore=0;
-let lastQIndex=-1, lastSession=-1, lastStatus='';
+let pid='', pname='';
+let sessQs=[], timerInt=null, stateInt=null, cdInt=null;
+let qStartTime=null, answered=false, myScore=0;
+let lastIdx=-1, lastSess=-1, lastStatus='';
+
+// ── Clean answer for comparison ──────────────────────────────────────────────
+function cleanAns(v) { return (v||'').trim().toUpperCase().replace(/[^A-D]/g,''); }
 
 async function joinGame() {
-  const name = document.getElementById('name-input').value.trim();
-  const pin  = document.getElementById('pin-input').value.trim();
+  const name = document.getElementById('inp-name').value.trim();
+  const pin  = document.getElementById('inp-pin').value.trim();
   if (!name) { showToast('Vui lòng nhập tên!'); return; }
   if (!pin)  { showToast('Vui lòng nhập mã phòng!'); return; }
 
-  const {data:state,error} = await db.from('game_state').select('*').eq('id','current').single();
-  if (!state || state.pin !== pin) { showToast('❌ Mã phòng không đúng!'); return; }
-  if (state.status !== 'lobby')   { showToast('❌ Game đã bắt đầu rồi!'); return; }
+  const btn = document.getElementById('btn-join');
+  btn.disabled = true;
+  btn.textContent = 'Đang kết nối...';
 
-  playerId   = 'p_'+Date.now()+'_'+Math.random().toString(36).substr(2,6);
-  playerName = name;
-  await db.from('players').upsert({id:playerId, name:playerName, score:0});
-  document.getElementById('lobby-name').textContent = `Xin chào, ${playerName}!`;
-  showScreen('lobby-screen');
-  startStatePolling();
+  // ── Retry up to 3 times to handle Supabase sync delay ──
+  let state = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    const {data} = await db.from('game_state').select('*').eq('id','current').single();
+    if (data && data.pin) { state = data; break; }
+    await new Promise(r => setTimeout(r, 800));
+  }
+
+  if (!state || state.pin !== pin) {
+    showToast('❌ Mã phòng không đúng!');
+    btn.disabled = false; btn.textContent = 'Tham gia →'; return;
+  }
+  if (state.status !== 'lobby') {
+    showToast('❌ Game đã bắt đầu rồi!');
+    btn.disabled = false; btn.textContent = 'Tham gia →'; return;
+  }
+
+  pid   = 'p_' + Date.now() + '_' + Math.random().toString(36).substr(2,6);
+  pname = name;
+  await db.from('players').upsert({id:pid, name:pname, score:0});
+  document.getElementById('lname').textContent = `Xin chào, ${pname}!`;
+  showScreen('s-lobby');
+  startPoll();
 }
 
-function startStatePolling() {
-  clearInterval(stateInterval);
-  stateInterval = setInterval(async () => {
-    const {data:state} = await db.from('game_state').select('*').eq('id','current').single();
-    if (!state) return;
+function startPoll() {
+  clearInterval(stateInt);
+  stateInt = setInterval(async () => {
+    const {data:st} = await db.from('game_state').select('*').eq('id','current').single();
+    if (!st) return;
 
-    // ── COUNTDOWN: new question coming ────────────────────────────────────────
-    if (state.status === 'countdown') {
-      const isNew = state.question_index !== lastQIndex || state.session !== lastSession;
-      if (isNew && state.session_questions) {
-        lastQIndex  = state.question_index;
-        lastSession = state.session;
-        lastStatus  = 'countdown';
-        hasAnswered = false;
-        sessionQuestions = state.session_questions;   // sync from host
-        startCountdown(state.question_index, state.countdown_started_at);
+    // COUNTDOWN — new question ready
+    if (st.status === 'countdown') {
+      const isNew = st.question_index !== lastIdx || st.session !== lastSess;
+      if (isNew && st.session_questions && st.session_questions.length > 0) {
+        lastIdx   = st.question_index;
+        lastSess  = st.session;
+        lastStatus = 'countdown';
+        answered  = false;
+        sessQs    = st.session_questions;
+        startCd(st.question_index, st.countdown_started_at);
       }
     }
 
-    // ── QUESTION: timer starts ────────────────────────────────────────────────
-    else if (state.status === 'question' && lastStatus !== 'question') {
+    // QUESTION — start timer
+    else if (st.status === 'question' && lastStatus !== 'question') {
       lastStatus = 'question';
-      clearInterval(countdownInterval);
-      // question_started_at set by host AFTER countdown → use as timer origin
-      questionStartTime = new Date(state.question_started_at).getTime();
-      showQuestion(state.question_index);
+      clearInterval(cdInt);
+      qStartTime = new Date(st.question_started_at).getTime();
+      showQ(st.question_index);
     }
 
-    // ── RESULT ────────────────────────────────────────────────────────────────
-    else if (state.status === 'result' && lastStatus !== 'result') {
+    // RESULT
+    else if (st.status === 'result' && lastStatus !== 'result') {
       lastStatus = 'result';
-      clearInterval(timerInterval);
-      if (!hasAnswered) showScreen('wait-screen');
+      clearInterval(timerInt);
+      if (!answered) showScreen('s-wait');
     }
 
-    // ── LOBBY (between sessions) ──────────────────────────────────────────────
-    else if (state.status === 'lobby' && lastStatus === 'result') {
+    // LOBBY break between sessions
+    else if (st.status === 'lobby' && lastStatus === 'result') {
       lastStatus = 'lobby_break';
-      showScreen('lobby-screen');
-      document.querySelector('.lobby-wait').textContent = 'Chờ Session 2 bắt đầu...';
+      showScreen('s-lobby');
+      document.querySelector('.lwait').textContent = 'Chờ Session 2 bắt đầu...';
     }
 
-    // ── FINAL ─────────────────────────────────────────────────────────────────
-    else if (state.status === 'final' && lastStatus !== 'final') {
+    // FINAL
+    else if (st.status === 'final' && lastStatus !== 'final') {
       lastStatus = 'final';
       showFinal();
     }
-  }, 1000); // poll every 1s for snappy sync
+  }, 1000);
 }
 
-// ── COUNTDOWN on player side (visual only, synced to host time) ───────────────
-function startCountdown(idx, countdownStartedAt) {
-  clearInterval(countdownInterval);
-  const q = sessionQuestions[idx];
+function startCd(idx, cdStart) {
+  clearInterval(cdInt);
+  const q = sessQs[idx];
   const adv = q && q._type === 'advanced';
-  document.getElementById('p-cdqinfo').textContent =
+  document.getElementById('p-cdinfo').textContent =
     `Câu ${idx+1}/10 · ${adv ? '⭐ Nâng cao' : 'Cơ bản'}`;
-  showScreen('countdown-screen');
+  showScreen('s-cd');
 
   function tick() {
-    const elapsed = (Date.now() - new Date(countdownStartedAt).getTime()) / 1000;
+    const elapsed = (Date.now() - new Date(cdStart).getTime()) / 1000;
     const left    = Math.max(0, 3 - elapsed);
-    const display = Math.ceil(left);
-    const el      = document.getElementById('p-cdnum');
-    if (el.textContent !== String(display)) {
-      el.textContent = display;
-      el.style.animation = 'none';
-      void el.offsetWidth;
-      el.style.animation = 'cdPop .8s ease';
-    }
-    if (left <= 0) clearInterval(countdownInterval);
+    const disp    = left > 0 ? Math.ceil(left) : '▶';
+    document.getElementById('p-cdnum').textContent = disp;
+    if (left <= 0) clearInterval(cdInt);
   }
   tick();
-  countdownInterval = setInterval(tick, 200);
+  cdInt = setInterval(tick, 200);
 }
 
-function showQuestion(idx) {
-  clearInterval(timerInterval);
-  const q = sessionQuestions[idx];
+function showQ(idx) {
+  clearInterval(timerInt);
+  const q = sessQs[idx];
   if (!q) return;
   const adv = q._type === 'advanced';
-  document.getElementById('p-q-counter').textContent = `Câu ${idx+1}/10`;
-  document.getElementById('p-q-type').textContent    = adv ? '⭐ NÂNG CAO' : 'CƠ BẢN';
-  document.getElementById('p-q-type').className      = `q-type ${adv?'advanced':'basic'}`;
-  document.getElementById('p-q-text').textContent    = q.question;
-  document.getElementById('p-ans-A').textContent     = q.A;
-  document.getElementById('p-ans-B').textContent     = q.B;
-  document.getElementById('p-ans-C').textContent     = q.C;
-  document.getElementById('p-ans-D').textContent     = q.D;
-  document.querySelectorAll('.ans-btn').forEach(b=>{ b.disabled=false; b.classList.remove('selected'); });
-  showScreen('question-screen');
-  startPlayerTimer();
+  document.getElementById('p-qnum').textContent = `Câu ${idx+1}/10`;
+  document.getElementById('p-qtag').textContent = adv ? '⭐ NÂNG CAO' : 'CƠ BẢN';
+  document.getElementById('p-qtag').className   = `qtag ${adv?'adv':'basic'}`;
+  document.getElementById('p-qtxt').textContent = q.question;
+  document.getElementById('p-A').textContent    = q.A;
+  document.getElementById('p-B').textContent    = q.B;
+  document.getElementById('p-C').textContent    = q.C;
+  document.getElementById('p-D').textContent    = q.D;
+  document.querySelectorAll('.abtn').forEach(b => { b.disabled=false; b.classList.remove('sel'); });
+  showScreen('s-q');
+  startTimer();
 }
 
-function startPlayerTimer() {
-  clearInterval(timerInterval);
-  const bar = document.getElementById('p-timer-bar');
-  const num = document.getElementById('p-timer');
-  timerInterval = setInterval(() => {
-    // elapsed from when host actually started the question (after countdown)
-    const elapsed = (Date.now() - questionStartTime) / 1000;
+function startTimer() {
+  clearInterval(timerInt);
+  const bar = document.getElementById('p-tbar');
+  const num = document.getElementById('p-tnum');
+  timerInt = setInterval(() => {
+    const elapsed = (Date.now() - qStartTime) / 1000;
     const left    = Math.max(0, 15 - elapsed);
-    bar.style.width = (left/15*100)+'%';
+    bar.style.width = (left/15*100) + '%';
     num.textContent = Math.ceil(left);
-    if (left <= 5) { bar.className='timer-bar warning'; num.className='timer-big warning'; }
-    else           { bar.className='timer-bar'; num.className='timer-big'; }
+    if (left <= 5) { bar.className='tbar warn'; num.className='tnum warn'; }
+    else           { bar.className='tbar';      num.className='tnum'; }
     if (left <= 0) {
-      clearInterval(timerInterval);
-      if (!hasAnswered) { hasAnswered=true; showScreen('wait-screen'); }
+      clearInterval(timerInt);
+      if (!answered) { answered=true; showScreen('s-wait'); }
     }
   }, 200);
 }
 
-async function submitAnswer(choice) {
-  if (hasAnswered) return;
-  hasAnswered = true;
-  clearInterval(timerInterval);
+async function submit(choice) {
+  if (answered) return;
+  answered = true;
+  clearInterval(timerInt);
 
-  // elapsed from when HOST set question_started_at — accurate, no polling bias
-  const elapsed = (Date.now() - questionStartTime) / 1000;
-  const q = sessionQuestions[lastQIndex];
+  const elapsed = (Date.now() - qStartTime) / 1000;
+  const q = sessQs[lastIdx];
+
+  // ── Compare cleaned values — eliminates whitespace/case mismatch ──
+  const correct = cleanAns(q.answer);
+  const chosen  = cleanAns(choice);
   let score = 0;
-  if (choice === q.answer) {
+  if (chosen === correct) {
     if      (elapsed < 5)  score = 2;
     else if (elapsed < 10) score = 1.75;
-    else if (elapsed <= 15) score = 1.5;
+    else                   score = 1.5;
   }
   myScore += score;
 
-  document.querySelectorAll('.ans-btn').forEach(b=>b.disabled=true);
-  document.querySelector(`.ans-btn.${choice}`).classList.add('selected');
+  document.querySelectorAll('.abtn').forEach(b => b.disabled = true);
+  document.querySelector(`.abtn.${choice}`).classList.add('sel');
 
   await db.from('answers').insert({
-    player_id:playerId, session:lastSession,
-    question_index:lastQIndex, answer:choice,
+    player_id: pid,
+    session:   lastSess,
+    question_index: lastIdx,
+    answer:    chosen,
     answered_at: parseFloat(elapsed.toFixed(2)),
-    score:score
+    score:     score
   });
-  await db.from('players').update({score:myScore}).eq('id',playerId);
-  setTimeout(()=>showScreen('wait-screen'), 400);
+  await db.from('players').update({score: myScore}).eq('id', pid);
+  setTimeout(() => showScreen('s-wait'), 400);
 }
 
 async function showFinal() {
-  clearInterval(stateInterval);
+  clearInterval(stateInt);
   const {data:lb} = await db.from('players').select('*').order('score',{ascending:false});
-  const rank = lb ? lb.findIndex(p=>p.id===playerId)+1 : 0;
-  const medals=['🥇','🥈','🥉'];
-  document.getElementById('final-medal').textContent     = medals[rank-1]||'🎉';
-  document.getElementById('final-score-val').textContent = myScore.toFixed(2)+' điểm';
-  document.getElementById('final-rank').textContent      = `Xếp hạng: ${rank} / ${lb?.length||0}`;
-  showScreen('final-screen');
+  const rank = lb ? lb.findIndex(p => p.id === pid) + 1 : 0;
+  const medals = ['🥇','🥈','🥉'];
+  document.getElementById('f-med').textContent   = medals[rank-1] || '🎉';
+  document.getElementById('f-score').textContent = myScore.toFixed(2) + ' điểm';
+  document.getElementById('f-rank').textContent  = `Xếp hạng: ${rank} / ${lb?.length||0}`;
+  showScreen('s-final');
 }
 
 function showScreen(id) {
-  ['join-screen','lobby-screen','countdown-screen','question-screen','wait-screen','final-screen'].forEach(s=>{
-    document.getElementById(s).style.display='none';
+  ['s-join','s-lobby','s-cd','s-q','s-wait','s-final'].forEach(s => {
+    document.getElementById(s).style.display = 'none';
   });
-  document.getElementById(id).style.display='flex';
+  document.getElementById(id).style.display = 'flex';
 }
 
 function showToast(msg) {
-  const t=document.getElementById('toast');
-  t.textContent=msg; t.classList.add('show');
-  setTimeout(()=>t.classList.remove('show'),3000);
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
 }
 
+// Auto-fill PIN from URL
 const urlPin = new URLSearchParams(window.location.search).get('pin');
-if (urlPin) document.getElementById('pin-input').value = urlPin;
+if (urlPin) document.getElementById('inp-pin').value = urlPin;
 </script>
 </body>
 </html>
