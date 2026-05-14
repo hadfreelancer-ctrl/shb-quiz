@@ -13,6 +13,7 @@
   body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at 30% 70%,rgba(200,16,46,.1) 0%,transparent 60%);pointer-events:none;z-index:0}
   .wrap{position:relative;z-index:1;flex:1;display:flex;flex-direction:column;padding:20px;max-width:500px;margin:0 auto;width:100%}
 
+  /* JOIN */
   #s-join{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px}
   .logo-icon{width:72px;height:72px;background:var(--red);border-radius:16px;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue';font-size:36px;color:#fff;margin:0 auto 12px}
   .logo-title{font-family:'Bebas Neue';font-size:32px;letter-spacing:3px;text-align:center}
@@ -25,17 +26,20 @@
   .btn-join:disabled{opacity:.5;cursor:not-allowed}
   .err-msg{color:#ff6b6b;font-size:13px;text-align:center;min-height:18px}
 
+  /* LOBBY */
   #s-lobby{display:none;flex:1;flex-direction:column;align-items:center;justify-content:center;gap:24px;text-align:center}
   .lname{font-family:'Bebas Neue';font-size:36px;color:var(--gold)}
   .lwait{color:var(--muted);font-size:15px}
   .pulse{animation:pulse 2s infinite}
   @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
 
+  /* COUNTDOWN */
   #s-cd{display:none;flex:1;flex-direction:column;align-items:center;justify-content:center;gap:16px;text-align:center}
   .cdlbl{font-size:13px;color:var(--muted);letter-spacing:3px;text-transform:uppercase}
   .cdnum{font-family:'Bebas Neue';font-size:160px;color:var(--gold);line-height:1}
   .cdinfo{font-size:13px;color:var(--muted)}
 
+  /* QUESTION */
   #s-q{display:none;flex:1;flex-direction:column;gap:14px}
   .qinfo{display:flex;justify-content:space-between;align-items:center}
   .qnum{font-size:13px;color:var(--muted)}
@@ -66,17 +70,38 @@
   .abtn.C .albl{background:rgb(234,179,8);color:#000}.abtn.D .albl{background:rgb(34,197,94);color:#000}
   .atxt{font-size:12px;font-weight:600;text-align:center;line-height:1.3;color:var(--text)}
 
+  /* WAIT */
   #s-wait{display:none;flex:1;flex-direction:column;align-items:center;justify-content:center;gap:20px;text-align:center}
   .wcheck{font-size:72px;animation:popIn .4s ease}
   @keyframes popIn{from{transform:scale(0)}to{transform:scale(1)}}
   .whint{font-size:13px;color:var(--muted)}
 
-  #s-final{display:none;flex:1;flex-direction:column;align-items:center;justify-content:center;gap:20px;text-align:center}
-  .fmed{font-size:80px}
-  .fttl{font-family:'Bebas Neue';font-size:48px;color:var(--gold)}
-  .fscore{font-size:16px;color:var(--muted)}
-  .fscore span{color:var(--white);font-weight:700;font-size:28px;display:block;margin-top:4px}
-  .frank{font-size:15px;color:var(--muted)}
+  /* FINAL */
+  #s-final{display:none;flex:1;flex-direction:column;gap:0;overflow-y:auto}
+  .final-header{text-align:center;padding:24px 0 16px;position:sticky;top:0;background:var(--bg);z-index:10;border-bottom:1px solid var(--border)}
+  .fmed{font-size:48px}
+  .fttl{font-family:'Bebas Neue';font-size:40px;color:var(--gold)}
+  .fscore{font-size:14px;color:var(--muted);margin-top:4px}
+  .fscore span{color:var(--white);font-weight:700;font-size:22px}
+  .frank{font-size:13px;color:var(--muted);margin-top:2px}
+
+  /* REVIEW LIST */
+  .rev-list{padding:16px 0;display:flex;flex-direction:column;gap:10px}
+  .rev-session{font-family:'Bebas Neue';font-size:16px;letter-spacing:2px;color:var(--muted);margin:8px 0 4px;padding:0 4px}
+  .rev-row{background:var(--surface);border-radius:12px;padding:14px 16px;border:1px solid var(--border);display:flex;flex-direction:column;gap:8px}
+  .rev-row.correct{border-color:rgba(34,197,94,.4)}
+  .rev-row.wrong{border-color:rgba(239,68,68,.3)}
+  .rev-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
+  .rev-qnum{font-size:11px;color:var(--muted);font-weight:700;letter-spacing:1px;white-space:nowrap;padding-top:2px}
+  .rev-qtxt{font-size:13px;font-weight:600;line-height:1.5;flex:1}
+  .rev-score{font-family:'Bebas Neue';font-size:18px;color:var(--gold);white-space:nowrap}
+  .rev-score.zero{color:var(--muted)}
+  .rev-answers{display:flex;flex-direction:column;gap:4px}
+  .rev-chosen{font-size:12px;font-weight:600}
+  .rev-chosen.ok{color:rgb(34,197,94)}
+  .rev-chosen.fail{color:rgb(239,68,68)}
+  .rev-correct{font-size:12px;color:rgb(34,197,94);font-weight:600}
+  .rev-no-ans{font-size:12px;color:var(--muted);font-style:italic}
 
   .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--surface2);border:1px solid var(--border);padding:10px 20px;border-radius:10px;font-size:13px;opacity:0;transition:opacity .3s;z-index:999}
   .toast.show{opacity:1}
@@ -134,10 +159,13 @@
   </div>
 
   <div id="s-final">
-    <div class="fmed" id="f-med">🎉</div>
-    <div class="fttl">KẾT THÚC!</div>
-    <div class="fscore">Tổng điểm của bạn:<span id="f-score">0</span></div>
-    <div class="frank" id="f-rank"></div>
+    <div class="final-header">
+      <div class="fmed" id="f-med">🎉</div>
+      <div class="fttl">KẾT THÚC!</div>
+      <div class="fscore">Tổng điểm: <span id="f-score">0</span></div>
+      <div class="frank" id="f-rank"></div>
+    </div>
+    <div class="rev-list" id="f-review"></div>
   </div>
 
 </div>
@@ -154,40 +182,26 @@ let qStartTime=null,answered=false,myScore=0;
 let lastIdx=-1,lastSess=-1,lastStatus='';
 
 function cleanAns(v){return(v||'').trim().toUpperCase().replace(/[^A-D]/g,'');}
-
 function setErr(msg){document.getElementById('err-msg').textContent=msg;}
 
-async function joinGame() {
+async function joinGame(){
   const name=document.getElementById('inp-name').value.trim();
   const pin=document.getElementById('inp-pin').value.trim();
   setErr('');
   if(!name){setErr('Vui lòng nhập tên!');return;}
   if(!pin){setErr('Vui lòng nhập mã phòng!');return;}
-
   const btn=document.getElementById('btn-join');
   btn.disabled=true; btn.textContent='Đang kết nối...';
 
-  // ── Retry up to 5 times × 600ms to handle any network/sync delay ──
   let state=null;
   for(let i=0;i<5;i++){
     const {data}=await db.from('game_state').select('pin,status').eq('id','current').single();
-    if(data && data.pin){state=data;break;}
+    if(data&&data.pin){state=data;break;}
     await new Promise(r=>setTimeout(r,600));
   }
-
-  if(!state){
-    setErr('❌ Không kết nối được server, thử lại!');
-    btn.disabled=false; btn.textContent='Tham gia →'; return;
-  }
-  // Convert both to string to avoid number vs string mismatch
-  if(String(state.pin).trim() !== String(pin).trim()){
-    setErr('❌ Mã phòng không đúng!');
-    btn.disabled=false; btn.textContent='Tham gia →'; return;
-  }
-  if(state.status!=='lobby'){
-    setErr('❌ Game đã bắt đầu rồi!');
-    btn.disabled=false; btn.textContent='Tham gia →'; return;
-  }
+  if(!state){setErr('❌ Không kết nối được server!');btn.disabled=false;btn.textContent='Tham gia →';return;}
+  if(String(state.pin).trim()!==String(pin).trim()){setErr('❌ Mã phòng không đúng!');btn.disabled=false;btn.textContent='Tham gia →';return;}
+  if(state.status!=='lobby'){setErr('❌ Game đã bắt đầu rồi!');btn.disabled=false;btn.textContent='Tham gia →';return;}
 
   pid='p_'+Date.now()+'_'+Math.random().toString(36).substr(2,6);
   pname=name;
@@ -202,43 +216,37 @@ function startPoll(){
   stateInt=setInterval(async()=>{
     const {data:st}=await db.from('game_state').select('*').eq('id','current').single();
     if(!st)return;
-
     if(st.status==='countdown'){
       const isNew=st.question_index!==lastIdx||st.session!==lastSess;
-      if(isNew && st.session_questions && st.session_questions.length>0){
-        lastIdx=st.question_index; lastSess=st.session;
-        lastStatus='countdown'; answered=false;
+      if(isNew&&st.session_questions&&st.session_questions.length>0){
+        lastIdx=st.question_index;lastSess=st.session;
+        lastStatus='countdown';answered=false;
         sessQs=st.session_questions;
         startCd(st.question_index,st.countdown_started_at);
       }
     }
     else if(st.status==='question'&&lastStatus!=='question'){
-      lastStatus='question';
-      clearInterval(cdInt);
+      lastStatus='question';clearInterval(cdInt);
       qStartTime=new Date(st.question_started_at).getTime();
       showQ(st.question_index);
     }
     else if(st.status==='result'&&lastStatus!=='result'){
-      lastStatus='result';
-      clearInterval(timerInt);
+      lastStatus='result';clearInterval(timerInt);
       if(!answered)showScreen('s-wait');
     }
     else if(st.status==='lobby'&&lastStatus==='result'){
-      lastStatus='lobby_break';
-      showScreen('s-lobby');
+      lastStatus='lobby_break';showScreen('s-lobby');
       document.querySelector('.lwait').textContent='Chờ Session 2 bắt đầu...';
     }
     else if(st.status==='final'&&lastStatus!=='final'){
-      lastStatus='final';
-      showFinal();
+      lastStatus='final';showFinal();
     }
   },1000);
 }
 
 function startCd(idx,cdStart){
   clearInterval(cdInt);
-  const q=sessQs[idx];
-  const adv=q&&q._type==='advanced';
+  const q=sessQs[idx],adv=q&&q._type==='advanced';
   document.getElementById('p-cdinfo').textContent=`Câu ${idx+1}/10 · ${adv?'⭐ Nâng cao':'Cơ bản'}`;
   showScreen('s-cd');
   function tick(){
@@ -246,12 +254,12 @@ function startCd(idx,cdStart){
     document.getElementById('p-cdnum').textContent=left>0?Math.ceil(left):'▶';
     if(left<=0)clearInterval(cdInt);
   }
-  tick(); cdInt=setInterval(tick,200);
+  tick();cdInt=setInterval(tick,200);
 }
 
 function showQ(idx){
   clearInterval(timerInt);
-  const q=sessQs[idx]; if(!q)return;
+  const q=sessQs[idx];if(!q)return;
   const adv=q._type==='advanced';
   document.getElementById('p-qnum').textContent=`Câu ${idx+1}/10`;
   document.getElementById('p-qtag').textContent=adv?'⭐ NÂNG CAO':'CƠ BẢN';
@@ -262,8 +270,7 @@ function showQ(idx){
   document.getElementById('p-C').textContent=q.C;
   document.getElementById('p-D').textContent=q.D;
   document.querySelectorAll('.abtn').forEach(b=>{b.disabled=false;b.classList.remove('sel');});
-  showScreen('s-q');
-  startTimer();
+  showScreen('s-q');startTimer();
 }
 
 function startTimer(){
@@ -271,7 +278,7 @@ function startTimer(){
   const bar=document.getElementById('p-tbar'),num=document.getElementById('p-tnum');
   timerInt=setInterval(()=>{
     const left=Math.max(0,15-(Date.now()-qStartTime)/1000);
-    bar.style.width=(left/15*100)+'%'; num.textContent=Math.ceil(left);
+    bar.style.width=(left/15*100)+'%';num.textContent=Math.ceil(left);
     if(left<=5){bar.className='tbar warn';num.className='tnum warn';}
     else{bar.className='tbar';num.className='tnum';}
     if(left<=0){clearInterval(timerInt);if(!answered){answered=true;showScreen('s-wait');}}
@@ -280,10 +287,10 @@ function startTimer(){
 
 async function submit(choice){
   if(answered)return;
-  answered=true; clearInterval(timerInt);
+  answered=true;clearInterval(timerInt);
   const elapsed=(Date.now()-qStartTime)/1000;
   const q=sessQs[lastIdx];
-  const correct=cleanAns(q.answer), chosen=cleanAns(choice);
+  const correct=cleanAns(q.answer),chosen=cleanAns(choice);
   let score=0;
   if(chosen===correct){
     if(elapsed<5)score=2;
@@ -295,7 +302,9 @@ async function submit(choice){
   document.querySelector(`.abtn.${choice}`).classList.add('sel');
   await db.from('answers').insert({
     player_id:pid,session:lastSess,question_index:lastIdx,
-    answer:chosen,answered_at:parseFloat(elapsed.toFixed(2)),score:score
+    answer:chosen,answered_at:parseFloat(elapsed.toFixed(2)),score:score,
+    question_text:q.question,
+    correct_answer:correct
   });
   await db.from('players').update({score:myScore}).eq('id',pid);
   setTimeout(()=>showScreen('s-wait'),400);
@@ -309,6 +318,39 @@ async function showFinal(){
   document.getElementById('f-med').textContent=medals[rank-1]||'🎉';
   document.getElementById('f-score').textContent=myScore.toFixed(2)+' điểm';
   document.getElementById('f-rank').textContent=`Xếp hạng: ${rank} / ${lb?.length||0}`;
+
+  // Load all answers → build review
+  const {data:myAns}=await db.from('answers')
+    .select('*').eq('player_id',pid)
+    .order('session',{ascending:true})
+    .order('question_index',{ascending:true});
+
+  let html='',lastSessShown=-1;
+  (myAns||[]).forEach(a=>{
+    if(a.session!==lastSessShown){
+      lastSessShown=a.session;
+      html+=`<div class="rev-session">— SESSION ${a.session} —</div>`;
+    }
+    const isCorrect=a.answer&&a.answer===a.correct_answer;
+    const noAns=!a.answer;
+    html+=`
+    <div class="rev-row ${isCorrect?'correct':'wrong'}">
+      <div class="rev-top">
+        <div class="rev-qnum">CÂU ${a.question_index+1}</div>
+        <div class="rev-qtxt">${a.question_text||'—'}</div>
+        <div class="rev-score ${(a.score||0)===0?'zero':''}">${(a.score||0)>0?'+':''}${(a.score||0).toFixed(2)}</div>
+      </div>
+      <div class="rev-answers">
+        ${noAns
+          ?`<span class="rev-no-ans">⏱ Không trả lời · Đáp án đúng: <b>${a.correct_answer||'—'}</b></span>`
+          :`<span class="rev-chosen ${isCorrect?'ok':'fail'}">${isCorrect?'✅':'❌'} Bạn chọn: <b>${a.answer}</b></span>
+           ${!isCorrect?`<span class="rev-correct">✔ Đáp án đúng: <b>${a.correct_answer}</b></span>`:''}`
+        }
+      </div>
+    </div>`;
+  });
+
+  document.getElementById('f-review').innerHTML = html||'<div style="color:var(--muted);text-align:center;padding:20px">Không có dữ liệu</div>';
   showScreen('s-final');
 }
 
