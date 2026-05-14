@@ -179,7 +179,8 @@ async function joinGame() {
     setErr('❌ Không kết nối được server, thử lại!');
     btn.disabled=false; btn.textContent='Tham gia →'; return;
   }
-  if(state.pin!==pin){
+  // Convert both to string to avoid number vs string mismatch
+  if(String(state.pin).trim() !== String(pin).trim()){
     setErr('❌ Mã phòng không đúng!');
     btn.disabled=false; btn.textContent='Tham gia →'; return;
   }
