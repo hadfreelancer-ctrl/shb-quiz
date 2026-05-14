@@ -23,6 +23,7 @@
   .btn-join{background:var(--red);color:#fff;border:none;border-radius:10px;padding:16px;font-size:17px;font-weight:800;cursor:pointer;font-family:'Be Vietnam Pro';margin-top:8px;transition:all .2s;width:100%}
   .btn-join:hover{background:var(--red-dark)}
   .btn-join:disabled{opacity:.5;cursor:not-allowed}
+  .err-msg{color:#ff6b6b;font-size:13px;text-align:center;min-height:18px}
 
   #s-lobby{display:none;flex:1;flex-direction:column;align-items:center;justify-content:center;gap:24px;text-align:center}
   .lname{font-family:'Bebas Neue';font-size:36px;color:var(--gold)}
@@ -94,6 +95,7 @@
         <input type="text" class="ifield" id="inp-name" placeholder="Nhập tên của bạn..." maxlength="30"></div>
       <div><label class="ilbl">Mã Phòng (PIN)</label>
         <input type="text" class="ifield" id="inp-pin" placeholder="Nhập mã 4 chữ số..." maxlength="4" inputmode="numeric"></div>
+      <div class="err-msg" id="err-msg"></div>
       <button class="btn-join" id="btn-join" onclick="joinGame()">Tham gia →</button>
     </div>
   </div>
@@ -141,219 +143,189 @@
 </div>
 <div class="toast" id="toast"></div>
 <script>
-const SB_URL = 'https://bqvpdddmgkjreqwcomav.supabase.co';
-const SB_KEY = 'sb_publishable_Iq4aS_moYquCQhU1XpwJew_F9kwtOBm';
-const {createClient} = supabase;
-const db = createClient(SB_URL, SB_KEY);
+const SB_URL='https://bqvpdddmgkjreqwcomav.supabase.co';
+const SB_KEY='sb_publishable_Iq4aS_moYquCQhU1XpwJew_F9kwtOBm';
+const {createClient}=supabase;
+const db=createClient(SB_URL,SB_KEY);
 
-let pid='', pname='';
-let sessQs=[], timerInt=null, stateInt=null, cdInt=null;
-let qStartTime=null, answered=false, myScore=0;
-let lastIdx=-1, lastSess=-1, lastStatus='';
+let pid='',pname='';
+let sessQs=[],timerInt=null,stateInt=null,cdInt=null;
+let qStartTime=null,answered=false,myScore=0;
+let lastIdx=-1,lastSess=-1,lastStatus='';
 
-// ── Clean answer for comparison ──────────────────────────────────────────────
-function cleanAns(v) { return (v||'').trim().toUpperCase().replace(/[^A-D]/g,''); }
+function cleanAns(v){return(v||'').trim().toUpperCase().replace(/[^A-D]/g,'');}
+
+function setErr(msg){document.getElementById('err-msg').textContent=msg;}
 
 async function joinGame() {
-  const name = document.getElementById('inp-name').value.trim();
-  const pin  = document.getElementById('inp-pin').value.trim();
-  if (!name) { showToast('Vui lòng nhập tên!'); return; }
-  if (!pin)  { showToast('Vui lòng nhập mã phòng!'); return; }
+  const name=document.getElementById('inp-name').value.trim();
+  const pin=document.getElementById('inp-pin').value.trim();
+  setErr('');
+  if(!name){setErr('Vui lòng nhập tên!');return;}
+  if(!pin){setErr('Vui lòng nhập mã phòng!');return;}
 
-  const btn = document.getElementById('btn-join');
-  btn.disabled = true;
-  btn.textContent = 'Đang kết nối...';
+  const btn=document.getElementById('btn-join');
+  btn.disabled=true; btn.textContent='Đang kết nối...';
 
-  // ── Retry up to 3 times to handle Supabase sync delay ──
-  let state = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    const {data} = await db.from('game_state').select('*').eq('id','current').single();
-    if (data && data.pin) { state = data; break; }
-    await new Promise(r => setTimeout(r, 800));
+  // ── Retry up to 5 times × 600ms to handle any network/sync delay ──
+  let state=null;
+  for(let i=0;i<5;i++){
+    const {data}=await db.from('game_state').select('pin,status').eq('id','current').single();
+    if(data && data.pin){state=data;break;}
+    await new Promise(r=>setTimeout(r,600));
   }
 
-  if (!state || state.pin !== pin) {
-    showToast('❌ Mã phòng không đúng!');
-    btn.disabled = false; btn.textContent = 'Tham gia →'; return;
+  if(!state){
+    setErr('❌ Không kết nối được server, thử lại!');
+    btn.disabled=false; btn.textContent='Tham gia →'; return;
   }
-  if (state.status !== 'lobby') {
-    showToast('❌ Game đã bắt đầu rồi!');
-    btn.disabled = false; btn.textContent = 'Tham gia →'; return;
+  if(state.pin!==pin){
+    setErr('❌ Mã phòng không đúng!');
+    btn.disabled=false; btn.textContent='Tham gia →'; return;
+  }
+  if(state.status!=='lobby'){
+    setErr('❌ Game đã bắt đầu rồi!');
+    btn.disabled=false; btn.textContent='Tham gia →'; return;
   }
 
-  pid   = 'p_' + Date.now() + '_' + Math.random().toString(36).substr(2,6);
-  pname = name;
-  await db.from('players').upsert({id:pid, name:pname, score:0});
-  document.getElementById('lname').textContent = `Xin chào, ${pname}!`;
+  pid='p_'+Date.now()+'_'+Math.random().toString(36).substr(2,6);
+  pname=name;
+  await db.from('players').upsert({id:pid,name:pname,score:0});
+  document.getElementById('lname').textContent=`Xin chào, ${pname}!`;
   showScreen('s-lobby');
   startPoll();
 }
 
-function startPoll() {
+function startPoll(){
   clearInterval(stateInt);
-  stateInt = setInterval(async () => {
-    const {data:st} = await db.from('game_state').select('*').eq('id','current').single();
-    if (!st) return;
+  stateInt=setInterval(async()=>{
+    const {data:st}=await db.from('game_state').select('*').eq('id','current').single();
+    if(!st)return;
 
-    // COUNTDOWN — new question ready
-    if (st.status === 'countdown') {
-      const isNew = st.question_index !== lastIdx || st.session !== lastSess;
-      if (isNew && st.session_questions && st.session_questions.length > 0) {
-        lastIdx   = st.question_index;
-        lastSess  = st.session;
-        lastStatus = 'countdown';
-        answered  = false;
-        sessQs    = st.session_questions;
-        startCd(st.question_index, st.countdown_started_at);
+    if(st.status==='countdown'){
+      const isNew=st.question_index!==lastIdx||st.session!==lastSess;
+      if(isNew && st.session_questions && st.session_questions.length>0){
+        lastIdx=st.question_index; lastSess=st.session;
+        lastStatus='countdown'; answered=false;
+        sessQs=st.session_questions;
+        startCd(st.question_index,st.countdown_started_at);
       }
     }
-
-    // QUESTION — start timer
-    else if (st.status === 'question' && lastStatus !== 'question') {
-      lastStatus = 'question';
+    else if(st.status==='question'&&lastStatus!=='question'){
+      lastStatus='question';
       clearInterval(cdInt);
-      qStartTime = new Date(st.question_started_at).getTime();
+      qStartTime=new Date(st.question_started_at).getTime();
       showQ(st.question_index);
     }
-
-    // RESULT
-    else if (st.status === 'result' && lastStatus !== 'result') {
-      lastStatus = 'result';
+    else if(st.status==='result'&&lastStatus!=='result'){
+      lastStatus='result';
       clearInterval(timerInt);
-      if (!answered) showScreen('s-wait');
+      if(!answered)showScreen('s-wait');
     }
-
-    // LOBBY break between sessions
-    else if (st.status === 'lobby' && lastStatus === 'result') {
-      lastStatus = 'lobby_break';
+    else if(st.status==='lobby'&&lastStatus==='result'){
+      lastStatus='lobby_break';
       showScreen('s-lobby');
-      document.querySelector('.lwait').textContent = 'Chờ Session 2 bắt đầu...';
+      document.querySelector('.lwait').textContent='Chờ Session 2 bắt đầu...';
     }
-
-    // FINAL
-    else if (st.status === 'final' && lastStatus !== 'final') {
-      lastStatus = 'final';
+    else if(st.status==='final'&&lastStatus!=='final'){
+      lastStatus='final';
       showFinal();
     }
-  }, 1000);
+  },1000);
 }
 
-function startCd(idx, cdStart) {
+function startCd(idx,cdStart){
   clearInterval(cdInt);
-  const q = sessQs[idx];
-  const adv = q && q._type === 'advanced';
-  document.getElementById('p-cdinfo').textContent =
-    `Câu ${idx+1}/10 · ${adv ? '⭐ Nâng cao' : 'Cơ bản'}`;
+  const q=sessQs[idx];
+  const adv=q&&q._type==='advanced';
+  document.getElementById('p-cdinfo').textContent=`Câu ${idx+1}/10 · ${adv?'⭐ Nâng cao':'Cơ bản'}`;
   showScreen('s-cd');
-
-  function tick() {
-    const elapsed = (Date.now() - new Date(cdStart).getTime()) / 1000;
-    const left    = Math.max(0, 3 - elapsed);
-    const disp    = left > 0 ? Math.ceil(left) : '▶';
-    document.getElementById('p-cdnum').textContent = disp;
-    if (left <= 0) clearInterval(cdInt);
+  function tick(){
+    const left=Math.max(0,3-(Date.now()-new Date(cdStart).getTime())/1000);
+    document.getElementById('p-cdnum').textContent=left>0?Math.ceil(left):'▶';
+    if(left<=0)clearInterval(cdInt);
   }
-  tick();
-  cdInt = setInterval(tick, 200);
+  tick(); cdInt=setInterval(tick,200);
 }
 
-function showQ(idx) {
+function showQ(idx){
   clearInterval(timerInt);
-  const q = sessQs[idx];
-  if (!q) return;
-  const adv = q._type === 'advanced';
-  document.getElementById('p-qnum').textContent = `Câu ${idx+1}/10`;
-  document.getElementById('p-qtag').textContent = adv ? '⭐ NÂNG CAO' : 'CƠ BẢN';
-  document.getElementById('p-qtag').className   = `qtag ${adv?'adv':'basic'}`;
-  document.getElementById('p-qtxt').textContent = q.question;
-  document.getElementById('p-A').textContent    = q.A;
-  document.getElementById('p-B').textContent    = q.B;
-  document.getElementById('p-C').textContent    = q.C;
-  document.getElementById('p-D').textContent    = q.D;
-  document.querySelectorAll('.abtn').forEach(b => { b.disabled=false; b.classList.remove('sel'); });
+  const q=sessQs[idx]; if(!q)return;
+  const adv=q._type==='advanced';
+  document.getElementById('p-qnum').textContent=`Câu ${idx+1}/10`;
+  document.getElementById('p-qtag').textContent=adv?'⭐ NÂNG CAO':'CƠ BẢN';
+  document.getElementById('p-qtag').className=`qtag ${adv?'adv':'basic'}`;
+  document.getElementById('p-qtxt').textContent=q.question;
+  document.getElementById('p-A').textContent=q.A;
+  document.getElementById('p-B').textContent=q.B;
+  document.getElementById('p-C').textContent=q.C;
+  document.getElementById('p-D').textContent=q.D;
+  document.querySelectorAll('.abtn').forEach(b=>{b.disabled=false;b.classList.remove('sel');});
   showScreen('s-q');
   startTimer();
 }
 
-function startTimer() {
+function startTimer(){
   clearInterval(timerInt);
-  const bar = document.getElementById('p-tbar');
-  const num = document.getElementById('p-tnum');
-  timerInt = setInterval(() => {
-    const elapsed = (Date.now() - qStartTime) / 1000;
-    const left    = Math.max(0, 15 - elapsed);
-    bar.style.width = (left/15*100) + '%';
-    num.textContent = Math.ceil(left);
-    if (left <= 5) { bar.className='tbar warn'; num.className='tnum warn'; }
-    else           { bar.className='tbar';      num.className='tnum'; }
-    if (left <= 0) {
-      clearInterval(timerInt);
-      if (!answered) { answered=true; showScreen('s-wait'); }
-    }
-  }, 200);
+  const bar=document.getElementById('p-tbar'),num=document.getElementById('p-tnum');
+  timerInt=setInterval(()=>{
+    const left=Math.max(0,15-(Date.now()-qStartTime)/1000);
+    bar.style.width=(left/15*100)+'%'; num.textContent=Math.ceil(left);
+    if(left<=5){bar.className='tbar warn';num.className='tnum warn';}
+    else{bar.className='tbar';num.className='tnum';}
+    if(left<=0){clearInterval(timerInt);if(!answered){answered=true;showScreen('s-wait');}}
+  },200);
 }
 
-async function submit(choice) {
-  if (answered) return;
-  answered = true;
-  clearInterval(timerInt);
-
-  const elapsed = (Date.now() - qStartTime) / 1000;
-  const q = sessQs[lastIdx];
-
-  // ── Compare cleaned values — eliminates whitespace/case mismatch ──
-  const correct = cleanAns(q.answer);
-  const chosen  = cleanAns(choice);
-  let score = 0;
-  if (chosen === correct) {
-    if      (elapsed < 5)  score = 2;
-    else if (elapsed < 10) score = 1.75;
-    else                   score = 1.5;
+async function submit(choice){
+  if(answered)return;
+  answered=true; clearInterval(timerInt);
+  const elapsed=(Date.now()-qStartTime)/1000;
+  const q=sessQs[lastIdx];
+  const correct=cleanAns(q.answer), chosen=cleanAns(choice);
+  let score=0;
+  if(chosen===correct){
+    if(elapsed<5)score=2;
+    else if(elapsed<10)score=1.75;
+    else score=1.5;
   }
-  myScore += score;
-
-  document.querySelectorAll('.abtn').forEach(b => b.disabled = true);
+  myScore+=score;
+  document.querySelectorAll('.abtn').forEach(b=>b.disabled=true);
   document.querySelector(`.abtn.${choice}`).classList.add('sel');
-
   await db.from('answers').insert({
-    player_id: pid,
-    session:   lastSess,
-    question_index: lastIdx,
-    answer:    chosen,
-    answered_at: parseFloat(elapsed.toFixed(2)),
-    score:     score
+    player_id:pid,session:lastSess,question_index:lastIdx,
+    answer:chosen,answered_at:parseFloat(elapsed.toFixed(2)),score:score
   });
-  await db.from('players').update({score: myScore}).eq('id', pid);
-  setTimeout(() => showScreen('s-wait'), 400);
+  await db.from('players').update({score:myScore}).eq('id',pid);
+  setTimeout(()=>showScreen('s-wait'),400);
 }
 
-async function showFinal() {
+async function showFinal(){
   clearInterval(stateInt);
-  const {data:lb} = await db.from('players').select('*').order('score',{ascending:false});
-  const rank = lb ? lb.findIndex(p => p.id === pid) + 1 : 0;
-  const medals = ['🥇','🥈','🥉'];
-  document.getElementById('f-med').textContent   = medals[rank-1] || '🎉';
-  document.getElementById('f-score').textContent = myScore.toFixed(2) + ' điểm';
-  document.getElementById('f-rank').textContent  = `Xếp hạng: ${rank} / ${lb?.length||0}`;
+  const {data:lb}=await db.from('players').select('*').order('score',{ascending:false});
+  const rank=lb?lb.findIndex(p=>p.id===pid)+1:0;
+  const medals=['🥇','🥈','🥉'];
+  document.getElementById('f-med').textContent=medals[rank-1]||'🎉';
+  document.getElementById('f-score').textContent=myScore.toFixed(2)+' điểm';
+  document.getElementById('f-rank').textContent=`Xếp hạng: ${rank} / ${lb?.length||0}`;
   showScreen('s-final');
 }
 
-function showScreen(id) {
-  ['s-join','s-lobby','s-cd','s-q','s-wait','s-final'].forEach(s => {
-    document.getElementById(s).style.display = 'none';
+function showScreen(id){
+  ['s-join','s-lobby','s-cd','s-q','s-wait','s-final'].forEach(s=>{
+    document.getElementById(s).style.display='none';
   });
-  document.getElementById(id).style.display = 'flex';
+  document.getElementById(id).style.display='flex';
 }
 
-function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg; t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 3000);
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),3000);
 }
 
-// Auto-fill PIN from URL
-const urlPin = new URLSearchParams(window.location.search).get('pin');
-if (urlPin) document.getElementById('inp-pin').value = urlPin;
+const urlPin=new URLSearchParams(window.location.search).get('pin');
+if(urlPin)document.getElementById('inp-pin').value=urlPin;
 </script>
 </body>
 </html>
